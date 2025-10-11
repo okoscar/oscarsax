@@ -64,19 +64,13 @@ export default function Navbar() {
               <Link
                 key={link.path}
                 href={link.path}
-                className={`relative text-sm font-medium tracking-widest transition-all duration-300 group ${
+                className={`text-sm font-medium tracking-widest transition-all duration-300 ${
                   isActive(link.path)
-                    ? 'text-yellow-400'
-                    : 'text-white/80 hover:text-white'
+                    ? 'text-yellow-400 font-semibold'
+                    : 'text-white/80 hover:text-yellow-400'
                 }`}
               >
                 {link.name}
-                {/* Active indicator */}
-                {isActive(link.path) && (
-                  <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-yellow-400"></span>
-                )}
-                {/* Hover indicator */}
-                <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
               </Link>
             ))}
           </div>
@@ -111,7 +105,7 @@ export default function Navbar() {
               className={`block text-lg font-medium tracking-wider transition-all duration-300 py-2 px-4 rounded-lg ${
                 isActive(link.path)
                   ? 'text-yellow-400 bg-white/10'
-                  : 'text-white/80 hover:text-white hover:bg-white/5'
+                  : 'text-white/80 hover:text-yellow-400 hover:bg-white/5'
               }`}
             >
               {link.name}

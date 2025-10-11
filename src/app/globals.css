@@ -1,3 +1,72 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Enhanced hover effects for music cards */
+.music-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.music-card:hover {
+  border-color: #facc15 !important;
+  transform: scale(1.05);
+}
+
+.music-card .music-card-bg {
+  transition: all 0.3s ease;
+}
+
+.music-card:hover .music-card-bg {
+  background-color: rgba(250, 204, 21, 0.1) !important;
+}
+
+.music-card .play-button {
+  transition: all 0.3s ease;
+}
+
+.music-card:hover .play-button {
+  border-color: #facc15 !important;
+  transform: scale(1.1);
+}
+
+.music-card .play-icon {
+  transition: all 0.3s ease;
+}
+
+.music-card:hover .play-icon {
+  border-left-color: #facc15 !important;
+}
+
+.music-card .card-content {
+  transition: all 0.3s ease;
+}
+
+.music-card:hover .card-content {
+  background-color: rgba(250, 204, 21, 0.1) !important;
+}
+
+.music-card .card-title {
+  transition: color 0.3s ease;
+}
+
+.music-card:hover .card-title {
+  color: #facc15 !important;
+}
+
+.music-card .card-description {
+  transition: color 0.3s ease;
+}
+
+.music-card:hover .card-description {
+  color: rgba(250, 204, 21, 0.8) !important;
+}
+
+.cta-button {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.cta-button:hover {
+  background-color: #facc15 !important;
+  transform: scale(1.05);
+}
