@@ -425,6 +425,231 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* About Section */}
+      <section className="bg-[#121212] py-20 px-6 border-t border-white/5">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Image Side */}
+            <div className="relative h-[600px] rounded-lg overflow-hidden">
+              <div 
+                className="absolute inset-0 bg-cover bg-center grayscale"
+                style={{ backgroundImage: `url('/oscar-sax.jpg')` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+              </div>
+            </div>
+
+            {/* Content Side */}
+            <div>
+              <h2 className="text-5xl md:text-6xl font-bold text-white mb-8 tracking-tight">
+                ABOUT OSCAR
+              </h2>
+              <div className="space-y-6 text-lg text-[#B3B3B3] leading-relaxed">
+                <p>
+                  Oscar Mulere is a Kampala-based saxophonist and bandleader who has been captivating audiences for over a decade. With a passion for jazz, soul, and contemporary music, Oscar brings a unique blend of technical mastery and emotional depth to every performance.
+                </p>
+                <p>
+                  From intimate wedding ceremonies to large-scale corporate events, Oscar's versatile repertoire and professional approach have made him one of Uganda's most sought-after live musicians. His ability to read the room and adapt his performance to suit any occasion sets him apart in the industry.
+                </p>
+                <p>
+                  Whether performing solo, with his band, or collaborating with other artists, Oscar's commitment to excellence and genuine love for music shines through in every note. His performances don't just entertain—they create lasting memories and elevate the atmosphere of any event.
+                </p>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
+                  <div>
+                    <div className="text-4xl font-bold text-[#FFB800] mb-2">500+</div>
+                    <div className="text-sm text-[#B3B3B3]">Events</div>
+                  </div>
+                  <div>
+                    <div className="text-4xl font-bold text-[#FFB800] mb-2">15+</div>
+                    <div className="text-sm text-[#B3B3B3]">Years</div>
+                  </div>
+                  <div>
+                    <div className="text-4xl font-bold text-[#FFB800] mb-2">100%</div>
+                    <div className="text-sm text-[#B3B3B3]">Satisfaction</div>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="pt-6">
+                  <Link
+                    href="/about"
+                    className="inline-block bg-transparent border-2 border-[#FFB800] text-[#FFB800] px-10 py-4 rounded-lg font-bold hover:bg-[#FFB800] hover:text-black transition"
+                  >
+                    READ MORE
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="bg-[#0a0a0a] py-20 px-6 border-t border-white/5">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+              LET'S CREATE SOMETHING SPECIAL
+            </h2>
+            <p className="text-lg text-[#B3B3B3] max-w-3xl mx-auto leading-relaxed">
+              Ready to add live music to your event? Get in touch and let's discuss how we can make your occasion unforgettable.
+            </p>
+          </div>
+
+          {/* Contact Form */}
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-lg p-8 md:p-12">
+            <form className="space-y-6">
+              {/* Name & Email Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="name" className="block text-white font-semibold mb-2">
+                    Your Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-white font-semibold mb-2">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition"
+                    placeholder="john@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Phone & Event Type Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="phone" className="block text-white font-semibold mb-2">
+                    Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition"
+                    placeholder="+256 XXX XXX XXX"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="eventType" className="block text-white font-semibold mb-2">
+                    Event Type *
+                  </label>
+                  <select
+                    id="eventType"
+                    className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white focus:border-[#FFB800] focus:outline-none transition"
+                    required
+                  >
+                    <option value="">Select event type</option>
+                    <option value="wedding">Wedding</option>
+                    <option value="introduction">Introduction Ceremony</option>
+                    <option value="corporate">Corporate Event</option>
+                    <option value="birthday">Birthday</option>
+                    <option value="band">Live Band Performance</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Date & Venue Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="date" className="block text-white font-semibold mb-2">
+                    Event Date
+                  </label>
+                  <input
+                    type="date"
+                    id="date"
+                    className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white focus:border-[#FFB800] focus:outline-none transition"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="venue" className="block text-white font-semibold mb-2">
+                    Venue/Location
+                  </label>
+                  <input
+                    type="text"
+                    id="venue"
+                    className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition"
+                    placeholder="Kampala"
+                  />
+                </div>
+              </div>
+
+              {/* Message */}
+              <div>
+                <label htmlFor="message" className="block text-white font-semibold mb-2">
+                  Message *
+                </label>
+                <textarea
+                  id="message"
+                  rows={5}
+                  className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition resize-none"
+                  placeholder="Tell me more about your event and any special requirements..."
+                  required
+                ></textarea>
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  className="w-full bg-[#FFB800] text-black py-4 rounded-lg font-bold text-lg hover:bg-[#FFD700] transition"
+                >
+                  SEND MESSAGE
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Contact Info */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[#FFB800] rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+              </div>
+              <h3 className="text-white font-bold mb-2">Phone</h3>
+              <p className="text-[#B3B3B3]">+256 XXX XXX XXX</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[#FFB800] rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-white font-bold mb-2">Email</h3>
+              <p className="text-[#B3B3B3]">info@oscarmulere.com</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[#FFB800] rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <h3 className="text-white font-bold mb-2">Location</h3>
+              <p className="text-[#B3B3B3]">Kampala, Uganda</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
