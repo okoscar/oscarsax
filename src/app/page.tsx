@@ -232,22 +232,22 @@ export default function Home() {
       </section>
 
       {/* Events Section */}
-      <section className="bg-[#0a0a0a] py-20 px-6 border-t border-white/5">
+      <section className="bg-[#f5f3ed] py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+            <h2 className="text-5xl md:text-6xl font-bold text-[#2a2a2a] mb-6 tracking-tight">
               EVENTS & SERVICES
             </h2>
-            <p className="text-lg text-[#B3B3B3] max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg text-[#6a6a6a] max-w-3xl mx-auto leading-relaxed">
               From intimate celebrations to grand corporate affairs, I bring the perfect soundtrack to your special moments.
             </p>
           </div>
 
           <div className="space-y-8">
-            {/* Wedding Card */}
-            <div className="group relative h-[80vh] min-h-[600px] bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden hover:border-[#FFB800] transition-all duration-500">
+            {/* Wedding Card - Soft Pink/Rose */}
+            <div className="group relative h-[80vh] min-h-[600px] bg-[#fef5f5] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
               <video 
-                className="absolute inset-0 w-full h-full object-cover grayscale"
+                className="absolute inset-0 w-full h-full object-cover"
                 autoPlay 
                 loop 
                 muted 
@@ -257,31 +257,31 @@ export default function Home() {
                 <source src="/oscar-sax.mp4" type="video/mp4" />
               </video>
               
-              <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-all duration-500"></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#8B4B4B]/90 via-[#8B4B4B]/60 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#5a3535]/95 via-[#5a3535]/40 to-transparent"></div>
               
               <div className="absolute bottom-0 left-0 right-0 p-12 z-10">
                 <div className="max-w-4xl">
-                  <div className="inline-block bg-[#FFB800] text-black px-6 py-3 rounded-lg mb-6 font-bold text-lg">
+                  <div className="inline-block bg-[#FFB800] text-black px-6 py-3 rounded-xl mb-6 font-bold text-lg shadow-lg">
                     WEDDINGS
                   </div>
-                  <h3 className="text-4xl md:text-6xl font-bold text-white mb-6 group-hover:text-[#FFD700] transition">
+                  <h3 className="text-4xl md:text-6xl font-bold text-white mb-6 group-hover:text-[#FFD700] transition drop-shadow-lg">
                     Make Your Special Day Unforgettable
                   </h3>
-                  <p className="text-xl text-[#B3B3B3] mb-8 max-w-2xl">
+                  <p className="text-xl text-white/90 mb-8 max-w-2xl drop-shadow-md">
                     Live saxophone performances that add elegance and romance to your wedding ceremony, cocktail hour, and reception. From classical pieces to modern love songs, I'll create the perfect ambiance for your celebration of love.
                   </p>
-                  <button className="bg-[#FFB800] text-black px-10 py-4 rounded-lg font-bold text-lg hover:bg-[#FFD700] transition">
+                  <button className="bg-[#FFB800] text-black px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#FFD700] hover:scale-105 transition shadow-xl">
                     INQUIRE NOW
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Introduction Ceremonies Card */}
-            <div className="group relative h-[80vh] min-h-[600px] bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden hover:border-[#FFB800] transition-all duration-500">
+            {/* Introduction Ceremonies Card - Warm Terracotta */}
+            <div className="group relative h-[80vh] min-h-[600px] bg-[#f9ede4] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
               <video 
-                className="absolute inset-0 w-full h-full object-cover grayscale"
+                className="absolute inset-0 w-full h-full object-cover"
                 autoPlay 
                 loop 
                 muted 
@@ -291,31 +291,31 @@ export default function Home() {
                 <source src="/oscar-sax.mp4" type="video/mp4" />
               </video>
               
-              <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-all duration-500"></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#A0604D]/90 via-[#A0604D]/60 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#6b4035]/95 via-[#6b4035]/40 to-transparent"></div>
               
               <div className="absolute bottom-0 left-0 right-0 p-12 z-10">
                 <div className="max-w-4xl">
-                  <div className="inline-block bg-[#FFB800] text-black px-6 py-3 rounded-lg mb-6 font-bold text-lg">
+                  <div className="inline-block bg-[#FFB800] text-black px-6 py-3 rounded-xl mb-6 font-bold text-lg shadow-lg">
                     INTRODUCTION CEREMONIES
                   </div>
-                  <h3 className="text-4xl md:text-6xl font-bold text-white mb-6 group-hover:text-[#FFD700] transition">
+                  <h3 className="text-4xl md:text-6xl font-bold text-white mb-6 group-hover:text-[#FFD700] transition drop-shadow-lg">
                     Celebrate Your Culture in Style
                   </h3>
-                  <p className="text-xl text-[#B3B3B3] mb-8 max-w-2xl">
+                  <p className="text-xl text-white/90 mb-8 max-w-2xl drop-shadow-md">
                     Traditional introduction ceremonies deserve exceptional entertainment. I blend contemporary saxophone with cultural authenticity to honor your heritage while creating a modern, sophisticated atmosphere that your guests will remember.
                   </p>
-                  <button className="bg-[#FFB800] text-black px-10 py-4 rounded-lg font-bold text-lg hover:bg-[#FFD700] transition">
+                  <button className="bg-[#FFB800] text-black px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#FFD700] hover:scale-105 transition shadow-xl">
                     INQUIRE NOW
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Corporate Events Card */}
-            <div className="group relative h-[80vh] min-h-[600px] bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden hover:border-[#FFB800] transition-all duration-500">
+            {/* Corporate Events Card - Navy Blue */}
+            <div className="group relative h-[80vh] min-h-[600px] bg-[#e8ecf0] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
               <video 
-                className="absolute inset-0 w-full h-full object-cover grayscale"
+                className="absolute inset-0 w-full h-full object-cover"
                 autoPlay 
                 loop 
                 muted 
@@ -325,31 +325,31 @@ export default function Home() {
                 <source src="/oscar-sax.mp4" type="video/mp4" />
               </video>
               
-              <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-all duration-500"></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#2C4A5E]/90 via-[#2C4A5E]/60 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1a2f3d]/95 via-[#1a2f3d]/40 to-transparent"></div>
               
               <div className="absolute bottom-0 left-0 right-0 p-12 z-10">
                 <div className="max-w-4xl">
-                  <div className="inline-block bg-[#FFB800] text-black px-6 py-3 rounded-lg mb-6 font-bold text-lg">
+                  <div className="inline-block bg-[#FFB800] text-black px-6 py-3 rounded-xl mb-6 font-bold text-lg shadow-lg">
                     CORPORATE EVENTS
                   </div>
-                  <h3 className="text-4xl md:text-6xl font-bold text-white mb-6 group-hover:text-[#FFD700] transition">
+                  <h3 className="text-4xl md:text-6xl font-bold text-white mb-6 group-hover:text-[#FFD700] transition drop-shadow-lg">
                     Elevate Your Corporate Function
                   </h3>
-                  <p className="text-xl text-[#B3B3B3] mb-8 max-w-2xl">
+                  <p className="text-xl text-white/90 mb-8 max-w-2xl drop-shadow-md">
                     Professional live music for product launches, company galas, conferences, and networking events. Create a sophisticated atmosphere that impresses clients and motivates your team with smooth jazz and contemporary instrumental music.
                   </p>
-                  <button className="bg-[#FFB800] text-black px-10 py-4 rounded-lg font-bold text-lg hover:bg-[#FFD700] transition">
+                  <button className="bg-[#FFB800] text-black px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#FFD700] hover:scale-105 transition shadow-xl">
                     INQUIRE NOW
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Birthdays Card */}
-            <div className="group relative h-[80vh] min-h-[600px] bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden hover:border-[#FFB800] transition-all duration-500">
+            {/* Birthdays Card - Warm Purple/Plum */}
+            <div className="group relative h-[80vh] min-h-[600px] bg-[#f4eff5] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
               <video 
-                className="absolute inset-0 w-full h-full object-cover grayscale"
+                className="absolute inset-0 w-full h-full object-cover"
                 autoPlay 
                 loop 
                 muted 
@@ -359,31 +359,31 @@ export default function Home() {
                 <source src="/oscar-sax.mp4" type="video/mp4" />
               </video>
               
-              <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-all duration-500"></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#6B4B6B]/90 via-[#6B4B6B]/60 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#4a344a]/95 via-[#4a344a]/40 to-transparent"></div>
               
               <div className="absolute bottom-0 left-0 right-0 p-12 z-10">
                 <div className="max-w-4xl">
-                  <div className="inline-block bg-[#FFB800] text-black px-6 py-3 rounded-lg mb-6 font-bold text-lg">
+                  <div className="inline-block bg-[#FFB800] text-black px-6 py-3 rounded-xl mb-6 font-bold text-lg shadow-lg">
                     BIRTHDAY CELEBRATIONS
                   </div>
-                  <h3 className="text-4xl md:text-6xl font-bold text-white mb-6 group-hover:text-[#FFD700] transition">
+                  <h3 className="text-4xl md:text-6xl font-bold text-white mb-6 group-hover:text-[#FFD700] transition drop-shadow-lg">
                     Make Their Day Extra Special
                   </h3>
-                  <p className="text-xl text-[#B3B3B3] mb-8 max-w-2xl">
+                  <p className="text-xl text-white/90 mb-8 max-w-2xl drop-shadow-md">
                     Whether it's a milestone birthday or an intimate gathering, live saxophone music adds that personal touch that makes celebrations truly memorable. Custom song selections and special birthday serenades available upon request.
                   </p>
-                  <button className="bg-[#FFB800] text-black px-10 py-4 rounded-lg font-bold text-lg hover:bg-[#FFD700] transition">
+                  <button className="bg-[#FFB800] text-black px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#FFD700] hover:scale-105 transition shadow-xl">
                     INQUIRE NOW
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Live Band Card */}
-            <div className="group relative h-[80vh] min-h-[600px] bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden hover:border-[#FFB800] transition-all duration-500">
+            {/* Live Band Card - Deep Green */}
+            <div className="group relative h-[80vh] min-h-[600px] bg-[#eff5f0] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
               <video 
-                className="absolute inset-0 w-full h-full object-cover grayscale"
+                className="absolute inset-0 w-full h-full object-cover"
                 autoPlay 
                 loop 
                 muted 
@@ -393,21 +393,21 @@ export default function Home() {
                 <source src="/oscar-sax.mp4" type="video/mp4" />
               </video>
               
-              <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-all duration-500"></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#3D5A4D]/90 via-[#3D5A4D]/60 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#2a3d33]/95 via-[#2a3d33]/40 to-transparent"></div>
               
               <div className="absolute bottom-0 left-0 right-0 p-12 z-10">
                 <div className="max-w-4xl">
-                  <div className="inline-block bg-[#FFB800] text-black px-6 py-3 rounded-lg mb-6 font-bold text-lg">
+                  <div className="inline-block bg-[#FFB800] text-black px-6 py-3 rounded-xl mb-6 font-bold text-lg shadow-lg">
                     LIVE BAND PERFORMANCES
                   </div>
-                  <h3 className="text-4xl md:text-6xl font-bold text-white mb-6 group-hover:text-[#FFD700] transition">
+                  <h3 className="text-4xl md:text-6xl font-bold text-white mb-6 group-hover:text-[#FFD700] transition drop-shadow-lg">
                     Full Band Experience
                   </h3>
-                  <p className="text-xl text-[#B3B3B3] mb-8 max-w-2xl">
+                  <p className="text-xl text-white/90 mb-8 max-w-2xl drop-shadow-md">
                     Looking for more than solo saxophone? I lead a professional band that delivers high-energy performances for large events, festivals, and concerts. Full sound production, vocalists, and a repertoire spanning jazz, soul, Afrobeat, and contemporary hits.
                   </p>
-                  <button className="bg-[#FFB800] text-black px-10 py-4 rounded-lg font-bold text-lg hover:bg-[#FFD700] transition">
+                  <button className="bg-[#FFB800] text-black px-10 py-4 rounded-xl font-bold text-lg hover:bg-[#FFD700] hover:scale-105 transition shadow-xl">
                     INQUIRE NOW
                   </button>
                 </div>
@@ -418,7 +418,7 @@ export default function Home() {
           <div className="text-center mt-16">
             <Link
               href="/contact"
-              className="inline-block bg-[#FFB800] text-black px-12 py-4 text-sm font-semibold uppercase tracking-widest hover:bg-[#FFD700] transition"
+              className="inline-block bg-[#2a2a2a] text-white px-12 py-4 text-sm font-semibold uppercase tracking-widest hover:bg-black transition rounded-xl shadow-xl"
             >
               BOOK YOUR EVENT
             </Link>
