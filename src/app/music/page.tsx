@@ -15,7 +15,7 @@ export default function MusicPage() {
           </div>
           
           <div className="bg-[#1a1a1a] p-6 rounded-lg border border-white/10">
-            <h3 className="text-xl font-bold mb-3">Original Releases</h3>
+            <h3 claaassName="text-xl font-bold mb-3">Original Releases</h3>
             <p className="text-[#B3B3B3]">My collection of original compositions</p>
           </div>
           
