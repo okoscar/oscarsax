@@ -437,26 +437,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 pt-12 border-t border-gray-200">
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#FFB800] mb-2">500+</div>
-              <div className="text-gray-600 text-sm uppercase tracking-wider">Events</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#FFB800] mb-2">100+</div>
-              <div className="text-gray-600 text-sm uppercase tracking-wider">Corporate Clients</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#FFB800] mb-2">15+</div>
-              <div className="text-gray-600 text-sm uppercase tracking-wider">Years Experience</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#FFB800] mb-2">98%</div>
-              <div className="text-gray-600 text-sm uppercase tracking-wider">Client Satisfaction</div>
-            </div>
-          </div>
         </div>
 
         <style jsx>{`
