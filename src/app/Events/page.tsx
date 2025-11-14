@@ -184,19 +184,6 @@ export default function GalleryGrid() {
     ? galleryItems 
     : galleryItems.filter(item => item.category === selectedCategory);
 
-  // Calculate distribution for debug info
-  const getVideoDistribution = () => {
-    const distribution = {
-      weddings: filteredItems.filter(item => item.category === 'weddings' && item.type === 'video').length,
-      corporate: filteredItems.filter(item => item.category === 'corporate' && item.type === 'video').length,
-      live: filteredItems.filter(item => item.category === 'live' && item.type === 'video').length,
-      studio: filteredItems.filter(item => item.category === 'studio' && item.type === 'video').length,
-    };
-    return distribution;
-  };
-
-  const videoDistribution = getVideoDistribution();
-
   // Video error handler
   const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement, Event>, item: any) => {
     console.log(`Video error for ${item.video}:`, e);
@@ -350,32 +337,6 @@ export default function GalleryGrid() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Debug Information */}
-      <section className="bg-red-900/20 py-4 px-6">
-        <div className="max-w-7xl mx-auto">
-          <details className="text-white text-sm">
-            <summary className="cursor-pointer">Debug Information</summary>
-            <div className="mt-2 space-y-1">
-              <div>Total Items: {filteredItems.length}</div>
-              <div>Videos: {filteredItems.filter(item => item.type === 'video').length}</div>
-              <div>Images: {filteredItems.filter(item => item.type === 'image').length}</div>
-              <div>Using images: /oscar-sax.jpg</div>
-              <div>Using videos: /wedding.mp4, /introduction.mp4</div>
-              <div>Video Distribution:</div>
-              <div className="ml-4">
-                <div>Wedding videos: {videoDistribution.weddings}</div>
-                <div>Corporate videos: {videoDistribution.corporate}</div>
-                <div>Live show videos: {videoDistribution.live}</div>
-                <div>Studio videos: {videoDistribution.studio}</div>
-              </div>
-              <div className="mt-2 text-green-400">
-                ✓ Media files are properly distributed across categories
-              </div>
-            </div>
-          </details>
         </div>
       </section>
 
@@ -646,8 +607,7 @@ export default function GalleryGrid() {
                   className="w-10 h-10 bg-black/50 border border-white/20 rounded-full flex items-center justify-center hover:bg-[#FFB800] hover:border-[#FFB800] transition-all duration-300 group"
                   aria-label="YouTube"
                 >
-                  <svg className="w-5 h-5 text-white group-hover:text-black transition" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  <svg className="w-5 h-5 text-white group-hover:text-black transition" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                   </svg>
                 </a>
                 

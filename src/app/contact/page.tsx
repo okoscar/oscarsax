@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-export default function AboutPage() {
+export default function ContactPage() {
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
       {/* Main Content Section with Background Image */}
@@ -20,7 +20,7 @@ export default function AboutPage() {
         {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/70"></div>
 
-        {/* Centered About Card */}
+        {/* Centered Contact Card */}
         <div className="relative z-10 w-full max-w-6xl mx-auto">
           <div className="flex flex-col lg:flex-row bg-white rounded-3xl overflow-hidden shadow-2xl">
             {/* Left Side - Dark with Logo and Badge */}
@@ -44,22 +44,47 @@ export default function AboutPage() {
                   </div>
                 </div>
 
-                {/* 10 Years Anniversary Badge */}
-                <div className="relative">
-                  <div className="w-48 h-48 rounded-full border-8 border-[#FFB800] bg-transparent flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-7xl font-bold text-[#FFB800] leading-none mb-2" style={{ fontFamily: 'serif' }}>10</div>
-                      <div className="text-xs text-[#FFB800] font-bold uppercase tracking-widest">Years</div>
-                      <div className="w-16 h-0.5 bg-[#FFB800] mx-auto my-2"></div>
-                      <div className="text-xs text-[#FFB800] font-bold uppercase tracking-widest">Anniversary</div>
-                      <div className="text-[10px] text-[#FFB800]/70 mt-1">2014 - 2024</div>
+                {/* Contact Info */}
+                <div className="w-full max-w-sm space-y-6">
+                  {/* Phone */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-[#FFB800] rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-white font-semibold mb-1">Phone</h3>
+                      <p className="text-white/70 text-sm">+256 XXX XXX XXX</p>
                     </div>
                   </div>
-                  {/* Laurel wreath decoration */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <svg className="w-56 h-56 text-[#FFB800]/30" viewBox="0 0 200 200" fill="currentColor">
-                      <path d="M100,20 Q110,25 115,35 Q120,30 130,28 Q125,40 122,50 Q130,48 140,50 Q132,60 128,70 Q138,70 148,75 Q138,82 132,92 Q142,95 150,102 Q140,108 132,118 Q140,123 145,133 Q135,135 128,142 Q133,150 135,160 Q125,158 118,162 Q120,172 118,182 Q110,175 105,168 Q100,175 95,182 Q93,172 95,162 Q88,158 78,160 Q80,150 85,142 Q78,135 68,133 Q73,123 78,118 Q70,108 60,102 Q68,95 75,92 Q68,82 60,75 Q70,70 80,70 Q76,60 68,50 Q78,48 86,50 Q83,40 78,28 Q88,30 93,35 Q98,25 100,20 Z"/>
-                    </svg>
+
+                  {/* Email */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-[#FFB800] rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-white font-semibold mb-1">Email</h3>
+                      <p className="text-white/70 text-sm">info@oscarmulere.com</p>
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-[#FFB800] rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-white font-semibold mb-1">Location</h3>
+                      <p className="text-white/70 text-sm">Kampala, Uganda</p>
+                      <p className="text-white/50 text-xs mt-1">Serving: Kampala • Entebbe • Jinja • Wakiso</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -71,24 +96,83 @@ export default function AboutPage() {
               }}></div>
             </div>
 
-            {/* Right Side - Content (White/Light) */}
+            {/* Right Side - Contact Form (White/Light) */}
             <div className="w-full lg:w-1/2 bg-[#f5f5f5] flex items-center p-8 lg:p-16">
               <div className="w-full">
-                <h2 className="text-4xl md:text-5xl font-bold text-black mb-8 tracking-tight">
-                  About Oscar Mulere
+                <h2 className="text-4xl md:text-5xl font-bold text-black mb-4 tracking-tight">
+                  Contact Form
                 </h2>
+                <p className="text-gray-600 mb-8">
+                  Fill out the form below and we'll get back to you shortly.
+                </p>
                 
-                <div className="space-y-6 mb-10">
-                  <p className="text-lg text-gray-700 leading-relaxed">
-                    Oscar Mulere is a professional saxophonist based in Kampala, Uganda, with over a decade of experience captivating audiences with his soulful melodies and passionate performances.
-                  </p>
-                  <p className="text-lg text-gray-700 leading-relaxed">
-                    His journey with music began at an early age, and through years of dedication and practice, he has mastered the art of bringing emotion and life to every note he plays.
-                  </p>
-                  <p className="text-lg text-gray-700 leading-relaxed">
-                    From intimate wedding ceremonies to grand corporate events, Oscar's versatility and professionalism have made him one of the most sought-after saxophonists in East Africa.
-                  </p>
-                </div>
+                <form className="space-y-6">
+                  {/* Name and Email Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Your name"
+                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-[#FFB800] focus:outline-none transition text-gray-800 placeholder-gray-400"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="email"
+                        placeholder="Your email"
+                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-[#FFB800] focus:outline-none transition text-gray-800 placeholder-gray-400"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Phone and Event Type Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <input
+                        type="tel"
+                        placeholder="Your Phone"
+                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-[#FFB800] focus:outline-none transition text-gray-800 placeholder-gray-400"
+                      />
+                    </div>
+                    <div>
+                      <select className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-[#FFB800] focus:outline-none transition text-gray-800">
+                        <option value="">Select event type</option>
+                        <option value="wedding">Wedding</option>
+                        <option value="corporate">Corporate Event</option>
+                        <option value="live">Live Show</option>
+                        <option value="studio">Studio Session</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Message */}
+                  <div>
+                    <textarea
+                      placeholder="Your message"
+                      rows={6}
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-[#FFB800] focus:outline-none transition text-gray-800 placeholder-gray-400 resize-none"
+                    ></textarea>
+                  </div>
+
+                  {/* reCAPTCHA placeholder */}
+                  <div className="bg-white border border-gray-300 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" id="notRobot" className="w-5 h-5" />
+                      <label htmlFor="notRobot" className="text-gray-700 text-sm">
+                        I'm not a robot
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    className="w-full bg-black text-white px-8 py-4 rounded-lg font-bold hover:bg-black/90 transition text-sm uppercase tracking-widest"
+                  >
+                    SUBMIT
+                  </button>
+                </form>
               </div>
             </div>
           </div>
