@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 
 export default function MusicPage() {
   const [activeTab, setActiveTab] = useState('popular');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const albums = [
     { id: 1, title: 'Wedding Sessions', year: '2024', type: 'Album', image: '/oscar-sax.jpg' },
@@ -12,6 +16,9 @@ export default function MusicPage() {
     { id: 3, title: 'Live at Kampala', year: '2023', type: 'Single', image: '/oscar-sax.jpg' },
     { id: 4, title: 'Smooth Evening', year: '2022', type: 'Single', image: '/oscar-sax.jpg' },
     { id: 5, title: 'Corporate Vibes', year: '2024', type: 'Single', image: '/oscar-sax.jpg' },
+    { id: 6, title: 'Romantic Nights', year: '2024', type: 'Album', image: '/oscar-sax.jpg' },
+    { id: 7, title: 'Saxophone Soul', year: '2023', type: 'Album', image: '/oscar-sax.jpg' },
+    { id: 8, title: 'Urban Jazz', year: '2024', type: 'Single', image: '/oscar-sax.jpg' },
   ];
 
   const singles = [
@@ -19,12 +26,79 @@ export default function MusicPage() {
     { id: 2, title: 'Romantic Sax', year: '2024', type: 'Single', image: '/oscar-sax.jpg' },
     { id: 3, title: 'Wedding March', year: '2023', type: 'Single', image: '/oscar-sax.jpg' },
     { id: 4, title: 'Jazz Fusion', year: '2023', type: 'Single', image: '/oscar-sax.jpg' },
+    { id: 5, title: 'Midnight Melodies', year: '2024', type: 'Single', image: '/oscar-sax.jpg' },
+    { id: 6, title: 'Sunset Sessions', year: '2024', type: 'Single', image: '/oscar-sax.jpg' },
+    { id: 7, title: 'Classic Covers', year: '2023', type: 'Single', image: '/oscar-sax.jpg' },
+    { id: 8, title: 'Modern Mix', year: '2024', type: 'Single', image: '/oscar-sax.jpg' },
   ];
 
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (audioRef.current) {
+      const progressBar = e.currentTarget;
+      const clickPosition = e.clientX - progressBar.getBoundingClientRect().left;
+      const progressBarWidth = progressBar.clientWidth;
+      const clickTime = (clickPosition / progressBarWidth) * duration;
+      
+      audioRef.current.currentTime = clickTime;
+      setCurrentTime(clickTime);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Cards Section */}
-      <section className="py-12 px-6 bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
+      {/* Photo Section at the Top with Grey Overlay */}
+      <section className="relative h-96 w-full overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-sm"
+          style={{
+            backgroundImage: `url('/oscar-sax.jpg')`,
+            backgroundPosition: 'center center',
+          }}
+        >
+          <div className="absolute inset-0 bg-[#4e4e4e]/80"></div>
+        </div>
+        
+        <div className="relative z-10 h-full flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 tracking-tight">
+              OSCAR MULERE
+            </h1>
+            <p className="text-xl text-white/80">Music & Discography</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Cards Section - Takes available space */}
+      <section className="py-12 px-6 bg-[#0a0a0a] flex-1">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold">Discography</h2>
@@ -38,9 +112,9 @@ export default function MusicPage() {
             <button onClick={() => setActiveTab('singles')} className={`px-5 py-2 rounded-full font-semibold text-sm transition ${activeTab === 'singles' ? 'bg-white text-black' : 'bg-white/10 text-white hover:bg-white/20'}`}>Singles and EPs</button>
           </div>
 
-          {/* Albums Grid with Lighter Background */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {(activeTab === 'popular' ? albums : activeTab === 'albums' ? albums : singles).map((album) => (
+          {/* Albums Grid with Lighter Background - Now shows 8 cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
+            {(activeTab === 'popular' ? albums : activeTab === 'albums' ? albums : singles).slice(0, 8).map((album) => (
               <div key={album.id} className="group cursor-pointer bg-[#1a1a1a] p-4 rounded-lg hover:bg-[#252525] transition duration-300">
                 <div className="relative mb-4 bg-[#282828] rounded-lg overflow-hidden shadow-lg aspect-square">
                   <img src={album.image} alt={album.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
@@ -58,8 +132,102 @@ export default function MusicPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-[#1a1a1a] border-t border-white/10">
+      {/* MP3 Player - Positioned at top of footer with increased length */}
+      <div className="bg-[#1a1a1a] border-t border-white/10 w-full">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 w-full">
+            <div className="flex items-center gap-6">
+              {/* Album Art - Larger */}
+              <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                <img 
+                  src="/oscar-sax.jpg" 
+                  alt="Now Playing" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Track Info - Expanded */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-4 mb-3">
+                  <h3 className="text-xl font-bold text-white truncate">Smooth Saxophone Melodies</h3>
+                  <p className="text-[#FFB800] text-base whitespace-nowrap">Oscar Mulere</p>
+                </div>
+                
+                {/* Progress Bar - Full Width and Larger */}
+                <div 
+                  className="w-full h-2 bg-white/20 rounded-full mb-2 cursor-pointer"
+                  onClick={handleProgressClick}
+                >
+                  <div 
+                    className="h-full bg-[#FFB800] rounded-full transition-all duration-100"
+                    style={{ width: `${(currentTime / duration) * 100}%` }}
+                  ></div>
+                </div>
+                
+                {/* Time Display */}
+                <div className="flex justify-between text-sm text-white/60">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>{formatTime(duration)}</span>
+                </div>
+              </div>
+
+              {/* Controls - Larger and More Spaced */}
+              <div className="flex items-center gap-4">
+                <button className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-white transition hover:scale-110">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                  </svg>
+                </button>
+                
+                <button 
+                  onClick={togglePlayPause}
+                  className="w-12 h-12 bg-[#FFB800] rounded-full flex items-center justify-center hover:scale-105 transition shadow-lg"
+                >
+                  {isPlaying ? (
+                    <svg className="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                  ) : (
+                    <svg className="w-6 h-6 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  )}
+                </button>
+                
+                <button className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-white transition hover:scale-110">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                  </svg>
+                </button>
+
+                {/* Volume Control - Larger */}
+                <div className="flex items-center gap-3 ml-2">
+                  <svg className="w-5 h-5 text-white/60" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                  </svg>
+                  <div className="w-20 h-1.5 bg-white/20 rounded-full">
+                    <div className="w-3/4 h-full bg-[#FFB800] rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Hidden Audio Element */}
+            <audio
+              ref={audioRef}
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleLoadedMetadata}
+              onEnded={() => setIsPlaying(false)}
+            >
+              <source src="/sample-music.mp3" type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Content Below MP3 Player */}
+      <footer className="bg-[#1a1a1a]">
         <div className="max-w-7xl mx-auto px-6 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             {/* Brand & Newsletter */}
@@ -261,7 +429,7 @@ export default function MusicPage() {
                   aria-label="Twitter"
                 >
                   <svg className="w-5 h-5 text-white group-hover:text-black transition" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833/L7.084 4.126H5.117z"/>
                   </svg>
                 </a>
                 
