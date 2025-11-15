@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import React from 'react';
 
 export default function AboutPage() {
   return (
@@ -20,47 +20,22 @@ export default function AboutPage() {
         {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/70"></div>
 
-        {/* Centered About Card */}
+       {/* Centered Contact Card */}
         <div className="relative z-10 w-full max-w-6xl mx-auto">
           <div className="flex flex-col lg:flex-row bg-white rounded-3xl overflow-hidden shadow-2xl">
-            {/* Left Side - Dark with Logo and Badge */}
+            {/* Left Side - Dark with Photo */}
             <div className="w-full lg:w-1/2 bg-[#2a2a2a] relative overflow-hidden flex items-center justify-center p-12 lg:p-16">
               {/* Background texture overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] to-[#3a3a3a] opacity-90"></div>
+  
               
               <div className="relative z-10 flex flex-col items-center justify-center">
-                {/* Logo/Brand */}
-                <div className="mb-12">
-                  <div className="text-center">
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#FFB800]">
-                      <div 
-                        className="w-full h-full bg-cover bg-center"
-                        style={{ backgroundImage: `url('/oscar-sax.jpg')` }}
-                      ></div>
-                    </div>
-                    <h2 className="text-3xl font-bold text-[#FFB800] tracking-wider">OSCAR MULERE</h2>
-                    <p className="text-white/70 text-sm uppercase tracking-widest mt-2">Professional Saxophonist</p>
-                    <p className="text-white/50 text-xs mt-1">Est. 2014</p>
-                  </div>
-                </div>
-
-                {/* 10 Years Anniversary Badge */}
-                <div className="relative">
-                  <div className="w-48 h-48 rounded-full border-8 border-[#FFB800] bg-transparent flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-7xl font-bold text-[#FFB800] leading-none mb-2" style={{ fontFamily: 'serif' }}>10</div>
-                      <div className="text-xs text-[#FFB800] font-bold uppercase tracking-widest">Years</div>
-                      <div className="w-16 h-0.5 bg-[#FFB800] mx-auto my-2"></div>
-                      <div className="text-xs text-[#FFB800] font-bold uppercase tracking-widest">Anniversary</div>
-                      <div className="text-[10px] text-[#FFB800]/70 mt-1">2014 - 2024</div>
-                    </div>
-                  </div>
-                  {/* Laurel wreath decoration */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <svg className="w-56 h-56 text-[#FFB800]/30" viewBox="0 0 200 200" fill="currentColor">
-                      <path d="M100,20 Q110,25 115,35 Q120,30 130,28 Q125,40 122,50 Q130,48 140,50 Q132,60 128,70 Q138,70 148,75 Q138,82 132,92 Q142,95 150,102 Q140,108 132,118 Q140,123 145,133 Q135,135 128,142 Q133,150 135,160 Q125,158 118,162 Q120,172 118,182 Q110,175 105,168 Q100,175 95,182 Q93,172 95,162 Q88,158 78,160 Q80,150 85,142 Q78,135 68,133 Q73,123 78,118 Q70,108 60,102 Q68,95 75,92 Q68,82 60,75 Q70,70 80,70 Q76,60 68,50 Q78,48 86,50 Q83,40 78,28 Q88,30 93,35 Q98,25 100,20 Z"/>
-                    </svg>
-                  </div>
+                {/* Large Circular Photo */}
+                <div className="w-80 h-80 rounded-full overflow-hidden border-8 border-[#FFB800] shadow-2xl">
+                  <div 
+                    className="w-full h-full bg-cover bg-center"
+                    style={{ backgroundImage: `url('/oscar-sax.jpg')` }}
+                  ></div>
                 </div>
               </div>
               
@@ -134,34 +109,34 @@ export default function AboutPage() {
               </h4>
               <ul className="space-y-2.5">
                 <li>
-                  <Link href="/services/weddings" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/services/weddings" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     Wedding Performances
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link href="/services/corporate" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/services/corporate" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     Corporate Events
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link href="/services/introduction" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/services/introduction" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     Introduction Ceremonies
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link href="/services/band" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/services/band" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     Live Band
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link href="/services/private" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/services/private" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     Private Events
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link href="/pricing" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/pricing" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     Pricing
-                  </Link>
+                  </a>
                 </li>
               </ul>
             </div>
@@ -173,34 +148,34 @@ export default function AboutPage() {
               </h4>
               <ul className="space-y-2.5">
                 <li>
-                  <Link href="/about" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/about" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     About Oscar
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link href="/music" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/music" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     Music & Covers
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link href="/gallery" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/gallery" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     Gallery
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link href="/testimonials" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/testimonials" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     Testimonials
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link href="/blog" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/blog" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     Blog
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link href="/contact" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
+                  <a href="/contact" className="text-[#B3B3B3] hover:text-[#FFB800] transition text-sm">
                     Contact
-                  </Link>
+                  </a>
                 </li>
               </ul>
             </div>
@@ -329,17 +304,17 @@ export default function AboutPage() {
 
               {/* Legal Links */}
               <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-                <Link href="/terms" className="text-[#B3B3B3] hover:text-[#FFB800] transition">
+                <a href="/terms" className="text-[#B3B3B3] hover:text-[#FFB800] transition">
                   Terms & Conditions
-                </Link>
+                </a>
                 <span className="text-white/20">•</span>
-                <Link href="/privacy" className="text-[#B3B3B3] hover:text-[#FFB800] transition">
+                <a href="/privacy" className="text-[#B3B3B3] hover:text-[#FFB800] transition">
                   Privacy Policy
-                </Link>
+                </a>
                 <span className="text-white/20">•</span>
-                <Link href="/careers" className="text-[#B3B3B3] hover:text-[#FFB800] transition">
+                <a href="/careers" className="text-[#B3B3B3] hover:text-[#FFB800] transition">
                   Careers
-                </Link>
+                </a>
               </div>
             </div>
 

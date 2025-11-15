@@ -8,7 +8,10 @@ export default function MusicPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTrack, setCurrentTrack] = useState<any>(null);
+  const [selectedVideo, setSelectedVideo] = useState<any>(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const albums = [
     { id: 1, title: 'Wedding Sessions', artist: 'Oscar Mulere', year: '2024', type: 'Album', image: '/oscar-sax.jpg', audio: '/charlie puth-Attention.mp3' },
@@ -31,6 +34,33 @@ export default function MusicPage() {
     { id: 7, title: 'Classic Covers', artist: 'Oscar Mulere', year: '2023', type: 'Single', image: '/oscar-sax.jpg', audio: '/charlie puth-Attention.mp3' },
     { id: 8, title: 'Modern Mix', artist: 'Oscar Mulere', year: '2024', type: 'Single', image: '/oscar-sax.jpg', audio: '/charlie puth-Attention.mp3' },
   ];
+
+  const videos = [
+    { id: 1, title: 'Wedding Performance Highlights', artist: 'Oscar Mulere', year: '2024', views: '12K', thumbnail: '/oscar-sax.jpg', duration: '5:32' },
+    { id: 2, title: 'Corporate Event Jazz Night', artist: 'Oscar Mulere', year: '2024', views: '8.5K', thumbnail: '/oscar-sax.jpg', duration: '4:15' },
+    { id: 3, title: 'Live at Serena Hotel', artist: 'Oscar Mulere', year: '2023', views: '15K', thumbnail: '/oscar-sax.jpg', duration: '6:45' },
+    { id: 4, title: 'Romantic Sax Covers', artist: 'Oscar Mulere', year: '2024', views: '20K', thumbnail: '/oscar-sax.jpg', duration: '3:28' },
+    { id: 5, title: 'Introduction Ceremony Special', artist: 'Oscar Mulere', year: '2023', views: '9K', thumbnail: '/oscar-sax.jpg', duration: '5:10' },
+    { id: 6, title: 'Smooth Jazz Sessions', artist: 'Oscar Mulere', year: '2024', views: '11K', thumbnail: '/oscar-sax.jpg', duration: '7:22' },
+  ];
+
+  const playVideo = (video: any) => {
+    setSelectedVideo(video);
+    setIsVideoPlaying(true);
+    // Pause audio if playing
+    if (audioRef.current && isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const closeVideo = () => {
+    setSelectedVideo(null);
+    setIsVideoPlaying(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+  };
 
   const playTrack = (track: any) => {
     if (audioRef.current) {
@@ -92,6 +122,55 @@ export default function MusicPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
+      {/* Video Modal Popup */}
+      {selectedVideo && (
+        <div 
+          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+          onClick={closeVideo}
+        >
+          <div 
+            className="relative w-full max-w-6xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={closeVideo}
+              className="absolute -top-12 right-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition z-10"
+            >
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Video Player */}
+            <div className="bg-black rounded-lg overflow-hidden shadow-2xl">
+              <video
+                ref={videoRef}
+                className="w-full aspect-video"
+                controls
+                autoPlay
+                src="/sample-video.mp4"
+              >
+                Your browser does not support the video tag.
+              </video>
+              
+              {/* Video Info */}
+              <div className="p-6 bg-[#1a1a1a]">
+                <h2 className="text-2xl font-bold text-white mb-2">{selectedVideo.title}</h2>
+                <p className="text-[#FFB800] mb-2">{selectedVideo.artist}</p>
+                <div className="flex items-center gap-3 text-sm text-white/60">
+                  <span>{selectedVideo.views} views</span>
+                  <span>•</span>
+                  <span>{selectedVideo.year}</span>
+                  <span>•</span>
+                  <span>{selectedVideo.duration}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Photo Section at the Top with Grey Overlay */}
       <section className="relative h-96 w-full overflow-hidden">
         <div 
@@ -127,36 +206,79 @@ export default function MusicPage() {
             <button onClick={() => setActiveTab('popular')} className={`px-5 py-2 rounded-full font-semibold text-sm transition ${activeTab === 'popular' ? 'bg-white text-black' : 'bg-white/10 text-white hover:bg-white/20'}`}>Popular releases</button>
             <button onClick={() => setActiveTab('albums')} className={`px-5 py-2 rounded-full font-semibold text-sm transition ${activeTab === 'albums' ? 'bg-white text-black' : 'bg-white/10 text-white hover:bg-white/20'}`}>Albums</button>
             <button onClick={() => setActiveTab('singles')} className={`px-5 py-2 rounded-full font-semibold text-sm transition ${activeTab === 'singles' ? 'bg-white text-black' : 'bg-white/10 text-white hover:bg-white/20'}`}>Singles and EPs</button>
+            <button onClick={() => setActiveTab('videos')} className={`px-5 py-2 rounded-full font-semibold text-sm transition ${activeTab === 'videos' ? 'bg-white text-black' : 'bg-white/10 text-white hover:bg-white/20'}`}>Videos</button>
           </div>
 
-          {/* Albums Grid with Lighter Background - Now shows 8 cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
-            {(activeTab === 'popular' ? albums : activeTab === 'albums' ? albums : singles).slice(0, 8).map((album) => (
-              <div key={album.id} className="group cursor-pointer bg-[#1a1a1a] p-4 rounded-lg hover:bg-[#252525] transition duration-300">
-                <div className="relative mb-4 bg-[#282828] rounded-lg overflow-hidden shadow-lg aspect-square">
-                  <img src={album.image} alt={album.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                  <button 
-                    onClick={() => playTrack(album)}
-                    className={`absolute bottom-2 right-2 w-12 h-12 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all shadow-xl hover:scale-105 ${
-                      currentTrack?.id === album.id && isPlaying ? 'bg-[#FFB800] opacity-100' : 'bg-[#FFB800]'
-                    }`}
-                  >
-                    {currentTrack?.id === album.id && isPlaying ? (
-                      <svg className="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                      </svg>
-                    ) : (
-                      <svg className="w-6 h-6 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    )}
-                  </button>
+          {/* Albums/Singles Grid - Shows when not videos tab */}
+          {activeTab !== 'videos' && (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
+              {(activeTab === 'popular' ? albums : activeTab === 'albums' ? albums : singles).slice(0, 8).map((album) => (
+                <div key={album.id} className="group cursor-pointer bg-[#1a1a1a] p-4 rounded-lg hover:bg-[#252525] transition duration-300">
+                  <div className="relative mb-4 bg-[#282828] rounded-lg overflow-hidden shadow-lg aspect-square">
+                    <img src={album.image} alt={album.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                    <button 
+                      onClick={() => playTrack(album)}
+                      className={`absolute bottom-2 right-2 w-12 h-12 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all shadow-xl hover:scale-105 ${
+                        currentTrack?.id === album.id && isPlaying ? 'bg-[#FFB800] opacity-100' : 'bg-[#FFB800]'
+                      }`}
+                    >
+                      {currentTrack?.id === album.id && isPlaying ? (
+                        <svg className="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                        </svg>
+                      ) : (
+                        <svg className="w-6 h-6 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  <h3 className="font-semibold mb-1 truncate group-hover:text-[#FFB800] transition">{album.title}</h3>
+                  <p className="text-sm text-white/60">{album.year} • {album.type}</p>
                 </div>
-                <h3 className="font-semibold mb-1 truncate group-hover:text-[#FFB800] transition">{album.title}</h3>
-                <p className="text-sm text-white/60">{album.year} • {album.type}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {/* Videos Grid - Shows when videos tab is active */}
+          {activeTab === 'videos' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {videos.map((video) => (
+                <div key={video.id} className="group cursor-pointer bg-[#1a1a1a] rounded-lg overflow-hidden hover:bg-[#252525] transition duration-300">
+                  <div className="relative bg-[#282828] overflow-hidden aspect-video">
+                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                    
+                    {/* Duration Badge */}
+                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-semibold">
+                      {video.duration}
+                    </div>
+                    
+                    {/* Play Button Overlay */}
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => playVideo(video)}
+                        className="w-16 h-16 bg-[#FFB800] rounded-full flex items-center justify-center hover:scale-110 transition shadow-2xl"
+                      >
+                        <svg className="w-8 h-8 text-black ml-1" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4">
+                    <h3 className="font-semibold mb-2 group-hover:text-[#FFB800] transition line-clamp-2">{video.title}</h3>
+                    <p className="text-sm text-white/60 mb-1">{video.artist}</p>
+                    <div className="flex items-center gap-2 text-xs text-white/50">
+                      <span>{video.views} views</span>
+                      <span>•</span>
+                      <span>{video.year}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
