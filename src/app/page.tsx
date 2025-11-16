@@ -559,22 +559,7 @@ export default function Home() {
                   Whether performing solo, with his band, or collaborating with other artists, Oscar&apos;s commitment to excellence and genuine love for music shines through in every note. His performances don&apos;t just entertain—they create lasting memories and elevate the atmosphere of any event.
                 </p>
 
-                <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
-                  <div>
-                    <div className="text-4xl font-bold text-[#FFB800] mb-2">500+</div>
-                    <div className="text-sm text-[#B3B3B3]">Events</div>
-                  </div>
-                  <div>
-                    <div className="text-4xl font-bold text-[#FFB800] mb-2">15+</div>
-                    <div className="text-sm text-[#B3B3B3]">Years</div>
-                  </div>
-                  <div>
-                    <div className="text-4xl font-bold text-[#FFB800] mb-2">100%</div>
-                    <div className="text-sm text-[#B3B3B3]">Satisfaction</div>
-                  </div>
-                </div>
-
-                <div className="pt-6">
+                                <div className="pt-6">
                   <Link
                     href="/about"
                     className="inline-block bg-transparent border-2 border-[#FFB800] text-[#FFB800] px-10 py-4 rounded-lg font-bold hover:bg-[#FFB800] hover:text-black transition"
