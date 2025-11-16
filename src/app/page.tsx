@@ -1,38 +1,47 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 
 export default function Home() {
+  const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
+
   const coverSongs = [
     { 
       title: 'Acoustic Cover', 
       description: 'Intimate acoustic arrangements',
-      thumbnail: '/thumbnails/acoustic.jpg'
+      thumbnail: '/thumbnails/acoustic.jpg',
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
     },
     { 
       title: 'Live Performance', 
       description: 'Captivating stage presence',
-      thumbnail: '/thumbnails/live.jpg'
+      thumbnail: '/thumbnails/live.jpg',
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
     },
     { 
       title: 'Jazz Session', 
       description: 'Smooth jazz interpretations',
-      thumbnail: '/thumbnails/jazz.jpg'
+      thumbnail: '/thumbnails/jazz.jpg',
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
     },
     { 
       title: 'Soul Covers', 
       description: 'Emotional soul performances',
-      thumbnail: '/thumbnails/soul.jpg'
+      thumbnail: '/thumbnails/soul.jpg',
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
     },
     { 
       title: 'Classic Hits', 
       description: 'Timeless classics reimagined',
-      thumbnail: '/thumbnails/classics.jpg'
+      thumbnail: '/thumbnails/classics.jpg',
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
     },
     { 
       title: 'Wedding Songs', 
       description: 'Perfect for special moments',
-      thumbnail: '/thumbnails/wedding.jpg'
+      thumbnail: '/thumbnails/wedding.jpg',
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
     },
   ];
 
@@ -47,8 +56,104 @@ export default function Home() {
     { title: 'SOULFUL REFLECTIONS', tracks: 13 },
   ];
 
+  const reviews = [
+    {
+      name: "Sarah & James",
+      event: "Wedding Ceremony",
+      date: "October 2024",
+      rating: 5,
+      text: "Oscar made our wedding absolutely magical! His saxophone performance during our ceremony brought tears to everyone's eyes. Professional, punctual, and incredibly talented.",
+      avatar: "🎭"
+    },
+    {
+      name: "David Mukasa",
+      event: "Corporate Gala",
+      date: "September 2024",
+      rating: 5,
+      text: "Hired Oscar for our annual corporate dinner. He read the room perfectly and kept the energy just right. Our guests are still talking about it!",
+      avatar: "💼"
+    },
+    {
+      name: "Patricia Nambi",
+      event: "Introduction Ceremony",
+      date: "August 2024",
+      rating: 5,
+      text: "Oscar beautifully blended traditional and contemporary music at our kwanjula. His respect for our culture while adding his unique touch was phenomenal.",
+      avatar: "👰"
+    },
+    {
+      name: "Robert Okello",
+      event: "Birthday Celebration",
+      date: "July 2024",
+      rating: 5,
+      text: "Surprised my wife with Oscar's performance for her 50th birthday. She was absolutely blown away! Worth every penny and more.",
+      avatar: "🎂"
+    },
+    {
+      name: "Grace Namusoke",
+      event: "Private Event",
+      date: "June 2024",
+      rating: 5,
+      text: "Oscar's professionalism and talent are unmatched. He took time to understand what we wanted and delivered beyond our expectations.",
+      avatar: "✨"
+    },
+    {
+      name: "Michael Wasswa",
+      event: "Wedding Reception",
+      date: "May 2024",
+      rating: 5,
+      text: "The best decision we made for our wedding! Oscar's live saxophone during cocktail hour was the highlight. So many compliments!",
+      avatar: "🎵"
+    },
+    {
+      name: "Jennifer Atim",
+      event: "Corporate Launch",
+      date: "April 2024",
+      rating: 5,
+      text: "Oscar performed at our product launch and created exactly the sophisticated atmosphere we needed. Highly recommend!",
+      avatar: "🚀"
+    },
+    {
+      name: "Emmanuel Ssemakula",
+      event: "Anniversary Party",
+      date: "March 2024",
+      rating: 5,
+      text: "Celebrated 25 years with my wife and Oscar's music made it unforgettable. His song selection was perfect for the occasion.",
+      avatar: "💑"
+    }
+  ];
+
   return (
     <div className="min-h-screen">
+      {/* Video Modal */}
+      {selectedVideo !== null && (
+        <div 
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedVideo(null)}
+        >
+          <div 
+            className="relative w-full max-w-5xl aspect-video bg-black rounded-lg overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedVideo(null)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-[#FFB800] rounded-full flex items-center justify-center transition-all duration-300 group"
+              aria-label="Close video"
+            >
+              <svg className="w-6 h-6 text-white group-hover:text-black transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <iframe
+              src={coverSongs[selectedVideo].videoUrl}
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div 
@@ -110,6 +215,7 @@ export default function Home() {
             {coverSongs.map((video, idx) => (
               <div
                 key={idx}
+                onClick={() => setSelectedVideo(idx)}
                 className="group relative bg-[#1a1a1a] border border-white/10 overflow-hidden cursor-pointer transition-all duration-500 hover:border-[#FFB800]"
                 style={{ height: '450px' }}
               >
@@ -140,7 +246,7 @@ export default function Home() {
 
           <div className="text-center mt-16">
             <Link
-              href="/music"
+              href="/music#videos"
               className="inline-block bg-[#FFB800] text-black px-12 py-4 text-sm font-semibold uppercase tracking-widest hover:bg-[#FFD700] transition"
             >
               VIEW ALL COVERS
@@ -197,8 +303,9 @@ export default function Home() {
               className="flex space-x-6 overflow-x-auto pb-8 px-4 scrollbar-hide snap-x snap-center"
             >
               {originalReleases.map((album, idx) => (
-                <div
+                <Link
                   key={idx}
+                  href={`/music#album-${idx}`}
                   className="group relative flex-shrink-0 w-80 h-96 bg-[#1a1a1a] border border-white/10 overflow-hidden cursor-pointer transition-all duration-700 ease-out hover:border-[#FFB800] snap-center hover:scale-110 hover:z-10"
                 >
                   <div 
@@ -224,7 +331,7 @@ export default function Home() {
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
                     <div className="absolute inset-0 shadow-2xl shadow-[#FFB800]/30"></div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
 
@@ -259,7 +366,9 @@ export default function Home() {
                 <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">WEDDINGS</div>
                 <h3 className="text-xl font-bold text-white mb-2">Make Your Special Day Unforgettable</h3>
                 <p className="text-sm text-white/90 mb-4 line-clamp-3">Live saxophone performances that add elegance and romance to your wedding ceremony and reception.</p>
-                <button className="w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition">INQUIRE NOW</button>
+                <Link href="/contact?event=wedding" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
+                  INQUIRE NOW
+                </Link>
               </div>
             </div>
 
@@ -274,7 +383,9 @@ export default function Home() {
                 <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">INTRODUCTION CEREMONIES</div>
                 <h3 className="text-xl font-bold text-white mb-2">Celebrate Your Culture in Style</h3>
                 <p className="text-sm text-white/90 mb-4 line-clamp-3">Traditional ceremonies with contemporary saxophone blending cultural authenticity.</p>
-                <button className="w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition">INQUIRE NOW</button>
+                <Link href="/contact?event=introduction" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
+                  INQUIRE NOW
+                </Link>
               </div>
             </div>
 
@@ -289,7 +400,9 @@ export default function Home() {
                 <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">CORPORATE EVENTS</div>
                 <h3 className="text-xl font-bold text-white mb-2">Elevate Your Corporate Function</h3>
                 <p className="text-sm text-white/90 mb-4 line-clamp-3">Professional live music for product launches, galas, and networking events.</p>
-                <button className="w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition">INQUIRE NOW</button>
+                <Link href="/contact?event=corporate" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
+                  INQUIRE NOW
+                </Link>
               </div>
             </div>
 
@@ -304,7 +417,9 @@ export default function Home() {
                 <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">BIRTHDAY CELEBRATIONS</div>
                 <h3 className="text-xl font-bold text-white mb-2">Make Their Day Extra Special</h3>
                 <p className="text-sm text-white/90 mb-4 line-clamp-3">Live saxophone music adds that personal touch to milestone birthdays.</p>
-                <button className="w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition">INQUIRE NOW</button>
+                <Link href="/contact?event=birthday" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
+                  INQUIRE NOW
+                </Link>
               </div>
             </div>
 
@@ -319,7 +434,9 @@ export default function Home() {
                 <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">LIVE BAND PERFORMANCES</div>
                 <h3 className="text-xl font-bold text-white mb-2">Full Band Experience</h3>
                 <p className="text-sm text-white/90 mb-4 line-clamp-3">Professional band delivering high-energy performances for large events.</p>
-                <button className="w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition">INQUIRE NOW</button>
+                <Link href="/contact?event=band" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
+                  INQUIRE NOW
+                </Link>
               </div>
             </div>
 
@@ -333,7 +450,9 @@ export default function Home() {
                 <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">PRIVATE EVENTS</div>
                 <h3 className="text-xl font-bold text-white mb-2">Exclusive Performances</h3>
                 <p className="text-sm text-white/90 mb-4 line-clamp-3">Custom performances for intimate gatherings and special occasions.</p>
-                <button className="w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition">INQUIRE NOW</button>
+                <Link href="/contact?event=private" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
+                  INQUIRE NOW
+                </Link>
               </div>
             </div>
           </div>
@@ -346,93 +465,48 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Clients Section */}
-      <section className="bg-white py-16 border-t border-b border-gray-200">
+      {/* Client Reviews Section */}
+      <section className="bg-gradient-to-b from-white to-gray-50 py-20 border-t border-b border-gray-200 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-bold text-[#2a2a2a] mb-4 tracking-tight">
-              TRUSTED BY LEADING BRANDS
+              WHAT OUR CLIENTS SAY
             </h2>
             <p className="text-lg text-[#6a6a6a] max-w-3xl mx-auto">
-              Proud to have provided unforgettable musical experiences for these distinguished organizations and events
+              Real experiences from real people who trusted us with their special moments
             </p>
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <svg
+                    key={star}
+                    className="w-6 h-6 text-[#FFB800]"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <span className="text-[#2a2a2a] font-bold ml-2">5.0</span>
+              <span className="text-[#6a6a6a]">• 150+ Reviews</span>
+            </div>
           </div>
 
-          {/* Client Logos Strip */}
           <div className="relative">
-            {/* Gradient Overlays */}
-            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10"></div>
-            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10"></div>
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-gray-50 to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-gray-50 to-transparent z-10 pointer-events-none"></div>
             
-            {/* Scrolling Client List */}
-            <div className="flex overflow-hidden space-x-12 py-4">
-              {/* First set */}
-              <div className="flex space-x-12 animate-scroll">
-                {[
-                  { name: 'Serena Hotels', type: 'Luxury Hospitality' },
-                  { name: 'MTN Uganda', type: 'Telecommunications' },
-                  { name: 'Standard Chartered', type: 'Banking & Finance' },
-                  { name: 'Uganda Wedding Expo', type: 'Events & Exhibitions' },
-                  { name: 'Kampala Serena Hotel', type: 'Five Star Hotel' },
-                  { name: 'Jumia Uganda', type: 'E-commerce' },
-                  { name: 'Multichoice Uganda', type: 'Media & Entertainment' },
-                  { name: 'Uganda Airlines', type: 'National Carrier' },
-                  { name: 'Nile Breweries', type: 'Beverage Industry' },
-                  { name: 'Riham Group', type: 'Food & Beverage' },
-                  { name: 'Uganda Tourism Board', type: 'Government Agency' },
-                  { name: 'Aga Khan Foundation', type: 'Development Organization' },
-                ].map((client, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center justify-center min-w-max px-6 py-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#FFB800] hover:shadow-lg transition-all duration-300 group"
-                  >
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#FFB800] to-[#FFD700] rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                    </div>
-                    <h3 className="font-bold text-gray-800 text-lg text-center group-hover:text-[#FFB800] transition-colors duration-300">
-                      {client.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm text-center mt-1">
-                      {client.type}
-                    </p>
-                  </div>
+            <div className="flex overflow-hidden">
+              <div className="flex space-x-6 animate-scroll-reviews">
+                {reviews.map((review, index) => (
+                  <ReviewCard key={index} review={review} />
                 ))}
               </div>
               
-              {/* Duplicate set for seamless loop */}
-              <div className="flex space-x-12 animate-scroll" aria-hidden="true">
-                {[
-                  { name: 'Serena Hotels', type: 'Luxury Hospitality' },
-                  { name: 'MTN Uganda', type: 'Telecommunications' },
-                  { name: 'Standard Chartered', type: 'Banking & Finance' },
-                  { name: 'Uganda Wedding Expo', type: 'Events & Exhibitions' },
-                  { name: 'Kampala Serena Hotel', type: 'Five Star Hotel' },
-                  { name: 'Jumia Uganda', type: 'E-commerce' },
-                  { name: 'Multichoice Uganda', type: 'Media & Entertainment' },
-                  { name: 'Uganda Airlines', type: 'National Carrier' },
-                  { name: 'Nile Breweries', type: 'Beverage Industry' },
-                  { name: 'Riham Group', type: 'Food & Beverage' },
-                  { name: 'Uganda Tourism Board', type: 'Government Agency' },
-                  { name: 'Aga Khan Foundation', type: 'Development Organization' },
-                ].map((client, index) => (
-                  <div
-                    key={`duplicate-${index}`}
-                    className="flex flex-col items-center justify-center min-w-max px-6 py-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#FFB800] hover:shadow-lg transition-all duration-300 group"
-                  >
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#FFB800] to-[#FFD700] rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                    </div>
-                    <h3 className="font-bold text-gray-800 text-lg text-center group-hover:text-[#FFB800] transition-colors duration-300">
-                      {client.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm text-center mt-1">
-                      {client.type}
-                    </p>
-                  </div>
+              <div className="flex space-x-6 animate-scroll-reviews" aria-hidden="true">
+                {reviews.map((review, index) => (
+                  <ReviewCard key={`dup-${index}`} review={review} />
                 ))}
               </div>
             </div>
@@ -440,7 +514,7 @@ export default function Home() {
         </div>
 
         <style jsx>{`
-          @keyframes scroll {
+          @keyframes scroll-reviews {
             0% {
               transform: translateX(0);
             }
@@ -448,10 +522,10 @@ export default function Home() {
               transform: translateX(-50%);
             }
           }
-          .animate-scroll {
-            animation: scroll 30s linear infinite;
+          .animate-scroll-reviews {
+            animation: scroll-reviews 40s linear infinite;
           }
-          .animate-scroll:hover {
+          .animate-scroll-reviews:hover {
             animation-play-state: paused;
           }
         `}</style>
@@ -479,10 +553,10 @@ export default function Home() {
                   Oscar Mulere is a Kampala-based saxophonist and bandleader who has been captivating audiences for over a decade. With a passion for jazz, soul, and contemporary music, Oscar brings a unique blend of technical mastery and emotional depth to every performance.
                 </p>
                 <p>
-                  From intimate wedding ceremonies to large-scale corporate events, Oscar's versatile repertoire and professional approach have made him one of Uganda's most sought-after live musicians. His ability to read the room and adapt his performance to suit any occasion sets him apart in the industry.
+                  From intimate wedding ceremonies to large-scale corporate events, Oscar&apos;s versatile repertoire and professional approach have made him one of Uganda&apos;s most sought-after live musicians. His ability to read the room and adapt his performance to suit any occasion sets him apart in the industry.
                 </p>
                 <p>
-                  Whether performing solo, with his band, or collaborating with other artists, Oscar's commitment to excellence and genuine love for music shines through in every note. His performances don't just entertain—they create lasting memories and elevate the atmosphere of any event.
+                  Whether performing solo, with his band, or collaborating with other artists, Oscar&apos;s commitment to excellence and genuine love for music shines through in every note. His performances don&apos;t just entertain—they create lasting memories and elevate the atmosphere of any event.
                 </p>
 
                 <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
@@ -519,10 +593,10 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-              LET'S CREATE SOMETHING SPECIAL
+              LET&apos;S CREATE SOMETHING SPECIAL
             </h2>
             <p className="text-lg text-[#B3B3B3] max-w-3xl mx-auto leading-relaxed">
-              Ready to add live music to your event? Get in touch and let's discuss how we can make your occasion unforgettable.
+              Ready to add live music to your event? Get in touch and let&apos;s discuss how we can make your occasion unforgettable.
             </p>
           </div>
 
@@ -671,11 +745,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Oscar Mulere Footer */}
+      {/* Footer */}
       <footer className="bg-[#1a1a1a] border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-            {/* Brand & Newsletter */}
             <div className="lg:col-span-1">
               <h3 className="text-white text-2xl font-bold mb-4 tracking-tight">
                 OSCAR MULERE
@@ -703,7 +776,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Services */}
             <div>
               <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
                 Services
@@ -742,7 +814,6 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Quick Links */}
             <div>
               <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
                 Quick Links
@@ -781,7 +852,6 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Contact & Locations */}
             <div>
               <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
                 Get in Touch
@@ -825,10 +895,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Social Media & Copyright */}
           <div className="pt-8 border-t border-white/10">
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-              {/* Social Icons */}
               <div className="flex items-center gap-4">
                 <a 
                   href="https://facebook.com" 
@@ -903,7 +971,6 @@ export default function Home() {
                 </a>
               </div>
 
-              {/* Legal Links */}
               <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
                 <Link href="/terms" className="text-[#B3B3B3] hover:text-[#FFB800] transition">
                   Terms & Conditions
@@ -919,7 +986,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Copyright */}
             <div className="mt-8 text-center">
               <p className="text-[#B3B3B3] text-sm">
                 © Copyright Oscar Mulere {new Date().getFullYear()}. All rights reserved.
@@ -928,6 +994,55 @@ export default function Home() {
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function ReviewCard({ review }: { review: { name: string; event: string; date: string; rating: number; text: string; avatar: string } }) {
+  return (
+    <div className="flex-shrink-0 w-[400px] bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 border border-gray-100 group hover:border-[#FFB800]">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-[#FFB800] to-[#FFD700] rounded-full flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform duration-300">
+            {review.avatar}
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-800 text-base group-hover:text-[#FFB800] transition-colors duration-300">
+              {review.name}
+            </h3>
+            <p className="text-xs text-gray-500">{review.event}</p>
+          </div>
+        </div>
+        <div className="text-xs text-gray-400">{review.date}</div>
+      </div>
+
+      <div className="flex gap-1 mb-3">
+        {[...Array(review.rating)].map((_, i) => (
+          <svg
+            key={i}
+            className="w-4 h-4 text-[#FFB800]"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        ))}
+      </div>
+
+      <p className="text-gray-700 text-sm leading-relaxed">
+        &quot;{review.text}&quot;
+      </p>
+
+      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+        <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fillRule="evenodd"
+            d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+            clipRule="evenodd"
+          />
+        </svg>
+        <span className="text-xs text-gray-500 font-medium">Verified Client</span>
+      </div>
     </div>
   );
 }
