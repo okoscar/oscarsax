@@ -2,9 +2,20 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { submitContactForm, subscribeToNewsletter } from '@/lib/firebaseServices';
+import { sendBookingNotification } from '@/lib/emailService';
 
 export default function Home() {
   const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
+  
+  // Contact Form States
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  
+  // Newsletter States
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [newsletterMessage, setNewsletterMessage] = useState('');
 
   const coverSongs = [
     { 
@@ -559,7 +570,7 @@ export default function Home() {
                   Whether performing solo, with his band, or collaborating with other artists, Oscar&apos;s commitment to excellence and genuine love for music shines through in every note. His performances don&apos;t just entertain—they create lasting memories and elevate the atmosphere of any event.
                 </p>
 
-                                <div className="pt-6">
+                <div className="pt-6">
                   <Link
                     href="/about"
                     className="inline-block bg-transparent border-2 border-[#FFB800] text-[#FFB800] px-10 py-4 rounded-lg font-bold hover:bg-[#FFB800] hover:text-black transition"
@@ -573,7 +584,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Section */}
+      {/* Contact Section with Firebase */}
       <section className="bg-[#0a0a0a] py-20 px-6 border-t border-white/5">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
@@ -586,7 +597,56 @@ export default function Home() {
           </div>
 
           <div className="bg-[#1a1a1a] border border-white/10 rounded-lg p-8 md:p-12">
-            <form className="space-y-6">
+            <form 
+              className="space-y-6"
+              onSubmit={async (e) => {
+
+              e.preventDefault();
+              setIsSubmitting(true);
+              setFormMessage(null);
+
+             const formData = {
+             name: (e.target as any).name.value,
+             email: (e.target as any).email.value,
+             phone: (e.target as any).phone.value,
+            eventType: (e.target as any).eventType.value,
+             eventDate: (e.target as any).date.value || '',
+           venue: (e.target as any).venue.value || '',
+            message: (e.target as any).message.value,
+  };
+
+        // Save to Firebase
+         const result = await submitContactForm(formData);
+
+       if (result.success) {
+       // Send email notification
+       await sendBookingNotification(formData);
+    
+    setFormMessage({ 
+      type: 'success', 
+      text: '✅ Thank you! We received your inquiry and will contact you within 24 hours.' 
+    });
+    (e.target as any).reset();
+  } else {
+    setFormMessage({ 
+      type: 'error', 
+      text: '❌ Oops! Something went wrong. Please try again or call us directly.' 
+    });
+  }
+
+  setIsSubmitting(false);
+}}
+            >
+              {formMessage && (
+                <div className={`p-4 rounded-lg ${
+                  formMessage.type === 'success' 
+                    ? 'bg-green-500/20 border border-green-500 text-green-100' 
+                    : 'bg-red-500/20 border border-red-500 text-red-100'
+                }`}>
+                  {formMessage.text}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-white font-semibold mb-2">
@@ -595,6 +655,7 @@ export default function Home() {
                   <input
                     type="text"
                     id="name"
+                    name="name"
                     className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition"
                     placeholder="John Doe"
                     required
@@ -607,6 +668,7 @@ export default function Home() {
                   <input
                     type="email"
                     id="email"
+                    name="email"
                     className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition"
                     placeholder="john@example.com"
                     required
@@ -622,6 +684,7 @@ export default function Home() {
                   <input
                     type="tel"
                     id="phone"
+                    name="phone"
                     className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition"
                     placeholder="+256 XXX XXX XXX"
                     required
@@ -633,6 +696,7 @@ export default function Home() {
                   </label>
                   <select
                     id="eventType"
+                    name="eventType"
                     className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white focus:border-[#FFB800] focus:outline-none transition"
                     required
                   >
@@ -655,6 +719,7 @@ export default function Home() {
                   <input
                     type="date"
                     id="date"
+                    name="date"
                     className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white focus:border-[#FFB800] focus:outline-none transition"
                   />
                 </div>
@@ -665,6 +730,7 @@ export default function Home() {
                   <input
                     type="text"
                     id="venue"
+                    name="venue"
                     className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition"
                     placeholder="Kampala"
                   />
@@ -677,6 +743,7 @@ export default function Home() {
                 </label>
                 <textarea
                   id="message"
+                  name="message"
                   rows={5}
                   className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition resize-none"
                   placeholder="Tell me more about your event and any special requirements..."
@@ -687,9 +754,10 @@ export default function Home() {
               <div className="pt-4">
                 <button
                   type="submit"
-                  className="w-full bg-[#FFB800] text-black py-4 rounded-lg font-bold text-lg hover:bg-[#FFD700] transition"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#FFB800] text-black py-4 rounded-lg font-bold text-lg hover:bg-[#FFD700] transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  SEND MESSAGE
+                  {isSubmitting ? 'SENDING...' : 'SEND MESSAGE'}
                 </button>
               </div>
             </form>
@@ -730,7 +798,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Footer with Newsletter */}
       <footer className="bg-[#1a1a1a] border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
@@ -746,18 +814,54 @@ export default function Home() {
                 <h4 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">
                   Subscribe to Newsletter
                 </h4>
-                <div className="flex">
+                <form 
+                  className="flex"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setIsSubscribing(true);
+                    setNewsletterMessage('');
+
+                    const result = await subscribeToNewsletter(newsletterEmail);
+
+                    if (result.success) {
+                      setNewsletterMessage('✅ Subscribed!');
+                      setNewsletterEmail('');
+                    } else if (result.message === 'Email already subscribed') {
+                      setNewsletterMessage('Already subscribed!');
+                    } else {
+                      setNewsletterMessage('❌ Error. Try again.');
+                    }
+
+                    setIsSubscribing(false);
+                    
+                    setTimeout(() => setNewsletterMessage(''), 3000);
+                  }}
+                >
                   <input
                     type="email"
                     placeholder="Enter your email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
                     className="flex-1 bg-black/50 border border-white/20 rounded-l-lg px-4 py-2.5 text-white text-sm placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition"
+                    required
                   />
-                  <button className="bg-[#FFB800] hover:bg-[#FFD700] px-4 rounded-r-lg transition">
-                    <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
+                  <button 
+                    type="submit"
+                    disabled={isSubscribing}
+                    className="bg-[#FFB800] hover:bg-[#FFD700] px-4 rounded-r-lg transition disabled:opacity-50"
+                  >
+                    {isSubscribing ? (
+                      <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    )}
                   </button>
-                </div>
+                </form>
+                {newsletterMessage && (
+                  <p className="text-xs mt-2 text-[#FFB800]">{newsletterMessage}</p>
+                )}
               </div>
             </div>
 
