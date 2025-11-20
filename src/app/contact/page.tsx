@@ -1,8 +1,101 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
+import { submitContactForm, subscribeToNewsletter } from '@/lib/firebaseServices';
+import { sendBookingNotification } from '@/lib/emailService';
 
 export default function ContactPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [newsletterMessage, setNewsletterMessage] = useState('');
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    eventType: '',
+    message: ''
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setFormMessage(null);
+
+    console.log('📝 Form submitted with data:', formData);
+
+    // Save to Firebase
+    const result = await submitContactForm({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      eventType: formData.eventType,
+      message: formData.message,
+    });
+
+    console.log('💾 Firebase result:', result);
+
+    if (result.success) {
+      // Send email notification
+      console.log('📧 Sending email notification...');
+      const emailResult = await sendBookingNotification({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        eventType: formData.eventType,
+        message: formData.message,
+      });
+      console.log('📧 Email result:', emailResult);
+      
+      setFormMessage({ 
+        type: 'success', 
+        text: '✅ Thank you! We received your inquiry and will contact you within 24 hours.' 
+      });
+      
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        eventType: '',
+        message: ''
+      });
+    } else {
+      setFormMessage({ 
+        type: 'error', 
+        text: '❌ Oops! Something went wrong. Please try again or call us directly.' 
+      });
+    }
+
+    setIsSubmitting(false);
+  };
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubscribing(true);
+    setNewsletterMessage('');
+
+    // Use the same function as homepage - direct Firebase write
+    const result = await subscribeToNewsletter(newsletterEmail);
+
+    if (result.success) {
+      setNewsletterMessage('✅ Subscribed!');
+      setNewsletterEmail('');
+    } else if (result.message === 'Email already subscribed') {
+      setNewsletterMessage('Already subscribed!');
+    } else {
+      setNewsletterMessage('❌ Error. Try again.');
+    }
+
+    setIsSubscribing(false);
+    
+    // Clear message after 3 seconds
+    setTimeout(() => setNewsletterMessage(''), 3000);
+  };
+
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
       {/* Main Content Section with Background Image */}
@@ -106,20 +199,39 @@ export default function ContactPage() {
                   Fill out the form below and we'll get back to you shortly.
                 </p>
                 
-                <form className="space-y-6">
+                {/* Success/Error Message */}
+                {formMessage && (
+                  <div className={`mb-6 p-4 rounded-lg ${
+                    formMessage.type === 'success' 
+                      ? 'bg-green-100 border border-green-400 text-green-800' 
+                      : 'bg-red-100 border border-red-400 text-red-800'
+                  }`}>
+                    {formMessage.text}
+                  </div>
+                )}
+                
+                <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Name and Email Row */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <input
                         type="text"
-                        placeholder="Your name"
+                        name="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        placeholder="Your name *"
+                        required
                         className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-[#FFB800] focus:outline-none transition text-gray-800 placeholder-gray-400"
                       />
                     </div>
                     <div>
                       <input
                         type="email"
-                        placeholder="Your email"
+                        name="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        placeholder="Your email *"
+                        required
                         className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-[#FFB800] focus:outline-none transition text-gray-800 placeholder-gray-400"
                       />
                     </div>
@@ -130,17 +242,29 @@ export default function ContactPage() {
                     <div>
                       <input
                         type="tel"
-                        placeholder="Your Phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        placeholder="Your Phone *"
+                        required
                         className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-[#FFB800] focus:outline-none transition text-gray-800 placeholder-gray-400"
                       />
                     </div>
                     <div>
-                      <select className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-[#FFB800] focus:outline-none transition text-gray-800">
-                        <option value="">Select event type</option>
+                      <select 
+                        name="eventType"
+                        value={formData.eventType}
+                        onChange={(e) => setFormData({...formData, eventType: e.target.value})}
+                        required
+                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-[#FFB800] focus:outline-none transition text-gray-800"
+                      >
+                        <option value="">Select event type *</option>
                         <option value="wedding">Wedding</option>
+                        <option value="introduction">Introduction Ceremony</option>
                         <option value="corporate">Corporate Event</option>
-                        <option value="live">Live Show</option>
-                        <option value="studio">Studio Session</option>
+                        <option value="birthday">Birthday</option>
+                        <option value="band">Live Band Performance</option>
+                        <option value="private">Private Event</option>
                         <option value="other">Other</option>
                       </select>
                     </div>
@@ -149,28 +273,23 @@ export default function ContactPage() {
                   {/* Message */}
                   <div>
                     <textarea
-                      placeholder="Your message"
+                      name="message"
+                      value={formData.message}
+                      onChange={(e) => setFormData({...formData, message: e.target.value})}
+                      placeholder="Your message *"
                       rows={6}
+                      required
                       className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-[#FFB800] focus:outline-none transition text-gray-800 placeholder-gray-400 resize-none"
                     ></textarea>
-                  </div>
-
-                  {/* reCAPTCHA placeholder */}
-                  <div className="bg-white border border-gray-300 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                      <input type="checkbox" id="notRobot" className="w-5 h-5" />
-                      <label htmlFor="notRobot" className="text-gray-700 text-sm">
-                        I'm not a robot
-                      </label>
-                    </div>
                   </div>
 
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-black text-white px-8 py-4 rounded-lg font-bold hover:bg-black/90 transition text-sm uppercase tracking-widest"
+                    disabled={isSubmitting}
+                    className="w-full bg-black text-white px-8 py-4 rounded-lg font-bold hover:bg-black/90 transition text-sm uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    SUBMIT
+                    {isSubmitting ? 'SENDING...' : 'SUBMIT'}
                   </button>
                 </form>
               </div>
@@ -196,18 +315,35 @@ export default function ContactPage() {
                 <h4 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">
                   Subscribe to Newsletter
                 </h4>
-                <div className="flex">
+                {newsletterMessage && (
+                  <div className={`mb-3 p-2 rounded text-xs ${
+                    newsletterMessage.type === 'success' 
+                      ? 'bg-green-500/20 text-green-300' 
+                      : 'bg-red-500/20 text-red-300'
+                  }`}>
+                    {newsletterMessage.text}
+                  </div>
+                )}
+                <form onSubmit={handleNewsletterSubmit} className="flex">
                   <input
                     type="email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
                     placeholder="Enter your email"
-                    className="flex-1 bg-black/50 border border-white/20 rounded-l-lg px-4 py-2.5 text-white text-sm placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition"
+                    required
+                    disabled={isSubscribing}
+                    className="flex-1 bg-black/50 border border-white/20 rounded-l-lg px-4 py-2.5 text-white text-sm placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition disabled:opacity-50"
                   />
-                  <button className="bg-[#FFB800] hover:bg-[#FFD700] px-4 rounded-r-lg transition">
+                  <button 
+                    type="submit"
+                    disabled={isSubscribing}
+                    className="bg-[#FFB800] hover:bg-[#FFD700] px-4 rounded-r-lg transition disabled:opacity-50"
+                  >
                     <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   </button>
-                </div>
+                </form>
               </div>
             </div>
 
