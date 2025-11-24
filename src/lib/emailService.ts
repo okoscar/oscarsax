@@ -14,7 +14,7 @@ export const sendBookingNotification = async (formData: {
     console.log('Service ID:', process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID);
     console.log('Template ID:', process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID);
     console.log('Public Key exists:', !!process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY);
-    
+
     const templateParams = {
       from_name: formData.name,
       from_email: formData.email,
@@ -23,7 +23,7 @@ export const sendBookingNotification = async (formData: {
       event_date: formData.eventDate || 'Not specified',
       venue: formData.venue || 'Not specified',
       message: formData.message,
-      timestamp: new Date().toLocaleString('en-UG', { 
+      timestamp: new Date().toLocaleString('en-UG', {
         timeZone: 'Africa/Kampala',
         dateStyle: 'full',
         timeStyle: 'short'
