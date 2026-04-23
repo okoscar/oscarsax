@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "Oscar Mulere - Professional Musician",
@@ -14,9 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-black text-white">
+      <body className="bg-black text-white font-sans selection:bg-[#FFB800] selection:text-black">
         <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   );

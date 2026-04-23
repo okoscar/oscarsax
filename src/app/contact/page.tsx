@@ -113,8 +113,11 @@ export default function ContactPage() {
               </div>
               <h3 className="text-white font-bold mb-2 text-lg">Phone</h3>
               <p className="text-[#B3B3B3] mb-3">Call or WhatsApp us</p>
-              <a href="tel:+256700000000" className="text-[#FFB800] hover:text-[#FFD700] transition font-semibold">
-                +256 XXX XXX XXX
+              <a href="tel:+256707397560" className="block text-[#FFB800] hover:text-[#FFD700] transition font-semibold">
+                +256 707 397 560
+              </a>
+              <a href="tel:+256792885211" className="block text-[#FFB800] hover:text-[#FFD700] transition font-semibold mt-1">
+                +256 792 885 211
               </a>
             </div>
 
@@ -126,8 +129,8 @@ export default function ContactPage() {
               </div>
               <h3 className="text-white font-bold mb-2 text-lg">Email</h3>
               <p className="text-[#B3B3B3] mb-3">Send us an email</p>
-              <a href="mailto:info@oscarmulere.com" className="text-[#FFB800] hover:text-[#FFD700] transition font-semibold">
-                info@oscarmulere.com
+              <a href="mailto:oscarmulele1@gmail.com" className="text-[#FFB800] hover:text-[#FFD700] transition font-semibold">
+                oscarmulele1@gmail.com
               </a>
             </div>
 
@@ -203,7 +206,7 @@ export default function ContactPage() {
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
                     className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-[#B3B3B3] focus:border-[#FFB800] focus:outline-none transition"
-                    placeholder="+256 XXX XXX XXX"
+                    placeholder="+256 707 397 560"
                     required
                   />
                 </div>
