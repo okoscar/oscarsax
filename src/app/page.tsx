@@ -6,12 +6,15 @@ import { submitContactForm, subscribeToNewsletter } from '@/lib/firebaseServices
 import { sendBookingNotification } from '@/lib/emailService';
 
 import { useEffect } from 'react';
-import { getSiteSettings, getReviews, SiteSettings, Review as CMSReview } from '@/lib/cmsServices';
+import { getSiteSettings, getReviews, getMusicTracks, getServices, SiteSettings, Review as CMSReview, MusicTrack, ServiceEvent } from '@/lib/cmsServices';
 
 export default function Home() {
   const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [dynamicReviews, setDynamicReviews] = useState<CMSReview[]>([]);
+  const [dynamicMusic, setDynamicMusic] = useState<MusicTrack[]>([]);
+  const [dynamicServices, setDynamicServices] = useState<ServiceEvent[]>([]);
+
   
   // Contact Form States
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,65 +27,47 @@ export default function Home() {
 
   useEffect(() => {
     async function loadCMSData() {
-      const [settings, revs] = await Promise.all([
+      const [settings, revs, tracks, servs] = await Promise.all([
         getSiteSettings(),
-        getReviews()
+        getReviews(),
+        getMusicTracks(),
+        getServices()
       ]);
       if (settings) setSiteSettings(settings);
       if (revs && revs.length > 0) setDynamicReviews(revs);
+      if (tracks && tracks.length > 0) setDynamicMusic(tracks);
+      if (servs && servs.length > 0) setDynamicServices(servs);
     }
     loadCMSData();
   }, []);
 
-  const coverSongs = [
-    { 
-      title: 'Acoustic Cover', 
-      description: 'Intimate acoustic arrangements',
-      thumbnail: '/thumbnails/acoustic.jpg',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    },
-    { 
-      title: 'Live Performance', 
-      description: 'Captivating stage presence',
-      thumbnail: '/thumbnails/live.jpg',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    },
-    { 
-      title: 'Jazz Session', 
-      description: 'Smooth jazz interpretations',
-      thumbnail: '/thumbnails/jazz.jpg',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    },
-    { 
-      title: 'Soul Covers', 
-      description: 'Emotional soul performances',
-      thumbnail: '/thumbnails/soul.jpg',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    },
-    { 
-      title: 'Classic Hits', 
-      description: 'Timeless classics reimagined',
-      thumbnail: '/thumbnails/classics.jpg',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    },
-    { 
-      title: 'Wedding Songs', 
-      description: 'Perfect for special moments',
-      thumbnail: '/thumbnails/wedding.jpg',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    },
-  ];
 
-  const originalReleases = [
-    { title: 'LIVE AT THE ROYAL ALBERT HALL', tracks: 14 },
-    { title: 'LIVE IN LOS ANGELES', tracks: 16 },
-    { title: 'ROAD LESS TRAVELED', tracks: 12 },
-    { title: 'ROAD LESS TRAVELED (INSTRUMENTAL)', tracks: 12 },
-    { title: 'ACOUSTIC SESSIONS', tracks: 10 },
-    { title: 'UNPLUGGED STORIES', tracks: 15 },
-    { title: 'MIDNIGHT MELODIES', tracks: 11 },
-    { title: 'SOULFUL REFLECTIONS', tracks: 13 },
-  ];
+  const coverSongs = dynamicMusic.length > 0 
+    ? dynamicMusic.filter(t => t.type === 'cover').map(t => ({
+        title: t.title,
+        description: t.artist || 'Cover Performance',
+        thumbnail: t.thumbnail || '/oscar-sax.jpg',
+        videoUrl: t.url.includes('youtube.com') || t.url.includes('youtu.be') 
+          ? t.url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/') 
+          : t.url
+      }))
+    : [
+        { title: 'Acoustic Cover', description: 'Intimate acoustic arrangements', thumbnail: '/oscar-sax.jpg', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+        { title: 'Live Performance', description: 'Captivating stage presence', thumbnail: '/oscar-sax.jpg', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+        { title: 'Jazz Session', description: 'Smooth jazz interpretations', thumbnail: '/oscar-sax.jpg', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+      ];
+
+  const originalReleases = dynamicMusic.length > 0 
+    ? dynamicMusic.filter(t => t.type === 'original').map(t => ({
+        title: t.title,
+        tracks: t.duration || 'Single',
+        thumbnail: t.thumbnail || '/oscar-sax.jpg'
+      }))
+    : [
+        { title: 'LIVE AT THE ROYAL ALBERT HALL', tracks: 14, thumbnail: '/oscar-sax.jpg' },
+        { title: 'LIVE IN LOS ANGELES', tracks: 16, thumbnail: '/oscar-sax.jpg' },
+        { title: 'ROAD LESS TRAVELED', tracks: 12, thumbnail: '/oscar-sax.jpg' },
+      ];
 
   const staticReviews = [
     {
@@ -90,36 +75,13 @@ export default function Home() {
       event: "Wedding Ceremony",
       date: "October 2024",
       rating: 5,
-      text: "Oscar made our wedding absolutely magical! His saxophone performance during our ceremony brought tears to everyone's eyes. Professional, punctual, and incredibly talented.",
+      text: "Oscar made our wedding absolutely magical! His saxophone performance during our ceremony brought tears to everyone's eyes.",
       avatar: "🎭"
-    },
-    {
-      name: "David Mukasa",
-      event: "Corporate Gala",
-      date: "September 2024",
-      rating: 5,
-      text: "Hired Oscar for our annual corporate dinner. He read the room perfectly and kept the energy just right. Our guests are still talking about it!",
-      avatar: "💼"
-    },
-    {
-      name: "Patricia Nambi",
-      event: "Introduction Ceremony",
-      date: "August 2024",
-      rating: 5,
-      text: "Oscar beautifully blended traditional and contemporary music at our kwanjula. His respect for our culture while adding his unique touch was phenomenal.",
-      avatar: "👰"
-    },
-    {
-      name: "Robert Okello",
-      event: "Birthday Celebration",
-      date: "July 2024",
-      rating: 5,
-      text: "Surprised my wife with Oscar's performance for her 50th birthday. She was absolutely blown away! Worth every penny and more.",
-      avatar: "🎂"
     }
   ];
 
   const displayReviews = dynamicReviews.length > 0 ? dynamicReviews : staticReviews;
+
 
   return (
     <div className="min-h-screen">
@@ -157,7 +119,7 @@ export default function Home() {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat grayscale"
           style={{
-            backgroundImage: `url('/oscar-sax.jpg')`,
+            backgroundImage: `url('${siteSettings?.heroImage || '/oscar-sax.jpg'}')`,
             backgroundPosition: 'center center',
           }}
         >
@@ -318,8 +280,9 @@ export default function Home() {
                 >
                   <div 
                     className="absolute inset-0 bg-cover bg-center grayscale"
-                    style={{ backgroundImage: `url('/oscar-sax.jpg')` }}
+                    style={{ backgroundImage: `url(${album.thumbnail || '/oscar-sax.jpg'})` }}
                   >
+
                     <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-all duration-500"></div>
                   </div>
 
@@ -363,101 +326,39 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Wedding */}
-            <div className="group relative h-[600px] bg-[#e8e8e8] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
-              <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline>
-                <source src="/wedding.mp4" type="video/mp4" />
-              </video>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-6 z-10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">WEDDINGS</div>
-                <h3 className="text-xl font-bold text-white mb-2">Make Your Special Day Unforgettable</h3>
-                <p className="text-sm text-white/90 mb-4 line-clamp-3">Live saxophone performances that add elegance and romance to your wedding ceremony and reception.</p>
-                <Link href="/contact?event=wedding" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
-                  INQUIRE NOW
-                </Link>
-              </div>
-            </div>
-
-            {/* Introduction */}
-            <div className="group relative h-[600px] bg-[#d4d4d4] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
-              <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline>
-                <source src="/introduction.mp4" type="video/mp4" />
-              </video>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-6 z-10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">INTRODUCTION CEREMONIES</div>
-                <h3 className="text-xl font-bold text-white mb-2">Celebrate Your Culture in Style</h3>
-                <p className="text-sm text-white/90 mb-4 line-clamp-3">Traditional ceremonies with contemporary saxophone blending cultural authenticity.</p>
-                <Link href="/contact?event=introduction" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
-                  INQUIRE NOW
-                </Link>
-              </div>
-            </div>
-
-            {/* Corporate */}
-            <div className="group relative h-[600px] bg-[#c0c0c0] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
-              <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline>
-                <source src="/wedding.mp4" type="video/mp4" />
-              </video>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-6 z-10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">CORPORATE EVENTS</div>
-                <h3 className="text-xl font-bold text-white mb-2">Elevate Your Corporate Function</h3>
-                <p className="text-sm text-white/90 mb-4 line-clamp-3">Professional live music for product launches, galas, and networking events.</p>
-                <Link href="/contact?event=corporate" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
-                  INQUIRE NOW
-                </Link>
-              </div>
-            </div>
-
-            {/* Birthdays */}
-            <div className="group relative h-[600px] bg-[#dbdbdb] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
-              <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline>
-                <source src="/birthday.mp4" type="video/mp4" />
-              </video>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-6 z-10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">BIRTHDAY CELEBRATIONS</div>
-                <h3 className="text-xl font-bold text-white mb-2">Make Their Day Extra Special</h3>
-                <p className="text-sm text-white/90 mb-4 line-clamp-3">Live saxophone music adds that personal touch to milestone birthdays.</p>
-                <Link href="/contact?event=birthday" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
-                  INQUIRE NOW
-                </Link>
-              </div>
-            </div>
-
-            {/* Live Band */}
-            <div className="group relative h-[600px] bg-[#cecece] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
-              <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline>
-                <source src="/introduction.mp4" type="video/mp4" />
-              </video>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-6 z-10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">LIVE BAND PERFORMANCES</div>
-                <h3 className="text-xl font-bold text-white mb-2">Full Band Experience</h3>
-                <p className="text-sm text-white/90 mb-4 line-clamp-3">Professional band delivering high-energy performances for large events.</p>
-                <Link href="/contact?event=band" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
-                  INQUIRE NOW
-                </Link>
-              </div>
-            </div>
-
-            {/* Private Events */}
-            <div className="group relative h-[600px] bg-[#d8d8d8] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
-              <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline>
-                <source src="/wedding.mp4" type="video/mp4" />
-              </video>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-6 z-10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs">PRIVATE EVENTS</div>
-                <h3 className="text-xl font-bold text-white mb-2">Exclusive Performances</h3>
-                <p className="text-sm text-white/90 mb-4 line-clamp-3">Custom performances for intimate gatherings and special occasions.</p>
-                <Link href="/contact?event=private" className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
-                  INQUIRE NOW
-                </Link>
-              </div>
-            </div>
+            {(dynamicServices.length > 0 ? dynamicServices : [
+              { id: '1', type: 'WEDDINGS', title: 'Make Your Special Day Unforgettable', description: 'Live saxophone performances that add elegance and romance to your wedding ceremony and reception.', mediaUrl: '/wedding.mp4' },
+              { id: '2', type: 'INTRODUCTION CEREMONIES', title: 'Celebrate Your Culture in Style', description: 'Traditional ceremonies with contemporary saxophone blending cultural authenticity.', mediaUrl: '/introduction.mp4' },
+              { id: '3', type: 'CORPORATE EVENTS', title: 'Elevate Your Corporate Function', description: 'Professional live music for product launches, galas, and networking events.', mediaUrl: '/wedding.mp4' },
+              { id: '4', type: 'BIRTHDAY CELEBRATIONS', title: 'Make Their Day Extra Special', description: 'Live saxophone music adds that personal touch to milestone birthdays.', mediaUrl: '/birthday.mp4' },
+              { id: '5', type: 'LIVE BAND PERFORMANCES', title: 'Full Band Experience', description: 'Professional band delivering high-energy performances for large events.', mediaUrl: '/introduction.mp4' },
+              { id: '6', type: 'PRIVATE EVENTS', title: 'Exclusive Performances', description: 'Custom performances for intimate gatherings and special occasions.', mediaUrl: '/wedding.mp4' }
+            ] as any).map((service: any, idx: number) => {
+              const isVideo = service.mediaUrl.toLowerCase().endsWith('.mp4');
+              return (
+                <div key={service.id || idx} className="group relative h-[600px] bg-[#e8e8e8] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
+                  {isVideo ? (
+                    <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline>
+                      <source src={service.mediaUrl} type="video/mp4" />
+                    </video>
+                  ) : (
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{ backgroundImage: `url('${service.mediaUrl}')` }}
+                    ></div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6 z-10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
+                    <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs uppercase">{service.type}</div>
+                    <h3 className="text-xl font-bold text-white mb-2">{service.title}</h3>
+                    <p className="text-sm text-white/90 mb-4 line-clamp-3">{service.description}</p>
+                    <Link href={`/contact?event=${service.type.toLowerCase()}`} className="block w-full bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#FFD700] transition text-center">
+                      INQUIRE NOW
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <div className="text-center mt-16">
@@ -541,7 +442,7 @@ export default function Home() {
             <div className="relative h-[600px] rounded-lg overflow-hidden">
               <div 
                 className="absolute inset-0 bg-cover bg-center grayscale"
-                style={{ backgroundImage: `url('/oscar-sax.jpg')` }}
+                style={{ backgroundImage: `url('${siteSettings?.aboutImage || '/oscar-sax.jpg'}')` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
               </div>
@@ -557,7 +458,7 @@ export default function Home() {
                 ) : (
                   <>
                     <p>
-                      Oscar Mulere is a Kampala-based saxophonist and bandleader who has been captivating audiences for over a decade. With a passion for jazz, soul, and contemporary music, Oscar brings a unique blend of technical mastery and emotional depth to every performance.
+                      Oscar Mulele is a Kampala-based saxophonist and bandleader who has been captivating audiences for over a decade. With a passion for jazz, soul, and contemporary music, Oscar brings a unique blend of technical mastery and emotional depth to every performance.
                     </p>
                     <p>
                       From intimate wedding ceremonies to large-scale corporate events, Oscar&apos;s versatile repertoire and professional approach have made him one of Uganda&apos;s most sought-after live musicians.

@@ -54,7 +54,7 @@ export default function Navbar() {
               <div className="absolute inset-0 bg-yellow-400/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300"></div>
             </div>
             <span className="text-xl font-bold text-white tracking-widest group-hover:text-yellow-400 transition-colors duration-300">
-              OSCAR MULERE
+              OSCAR MULELE
             </span>
           </Link>
 

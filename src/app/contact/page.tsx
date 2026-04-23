@@ -4,11 +4,15 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { submitContactForm } from '@/lib/firebaseServices';
 import { sendBookingNotification } from '@/lib/emailService';
+import { getSiteSettings, SiteSettings } from '@/lib/cmsServices';
+
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [prefilledEventType, setPrefilledEventType] = useState('');
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
+
   
   const [formData, setFormData] = useState({
     name: '',
@@ -21,6 +25,12 @@ export default function ContactPage() {
   });
 
   useEffect(() => {
+    async function loadData() {
+      const settings = await getSiteSettings();
+      if (settings) setSiteSettings(settings);
+    }
+    loadData();
+
     const params = new URLSearchParams(window.location.search);
     const eventType = params.get('event');
     if (eventType) {
@@ -28,6 +38,7 @@ export default function ContactPage() {
       setFormData(prev => ({ ...prev, eventType }));
     }
   }, []);
+
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -96,7 +107,7 @@ export default function ContactPage() {
             GET IN TOUCH
           </h1>
           <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-            Let's create unforgettable moments together. Book Oscar Mulere for your next event.
+            Let's create unforgettable moments together. Book Oscar Mulele for your next event.
           </p>
         </div>
       </section>
@@ -113,12 +124,21 @@ export default function ContactPage() {
               </div>
               <h3 className="text-white font-bold mb-2 text-lg">Phone</h3>
               <p className="text-[#B3B3B3] mb-3">Call or WhatsApp us</p>
-              <a href="tel:+256707397560" className="block text-[#FFB800] hover:text-[#FFD700] transition font-semibold">
-                +256 707 397 560
-              </a>
-              <a href="tel:+256792885211" className="block text-[#FFB800] hover:text-[#FFD700] transition font-semibold mt-1">
-                +256 792 885 211
-              </a>
+              {siteSettings?.contactPhone ? (
+                <a href={`tel:${siteSettings.contactPhone.replace(/\s+/g, '')}`} className="block text-[#FFB800] hover:text-[#FFD700] transition font-semibold">
+                  {siteSettings.contactPhone}
+                </a>
+              ) : (
+                <>
+                  <a href="tel:+256707397560" className="block text-[#FFB800] hover:text-[#FFD700] transition font-semibold">
+                    +256 707 397 560
+                  </a>
+                  <a href="tel:+256792885211" className="block text-[#FFB800] hover:text-[#FFD700] transition font-semibold mt-1">
+                    +256 792 885 211
+                  </a>
+                </>
+              )}
+
             </div>
 
             <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-8 text-center hover:border-[#FFB800] transition-all duration-300 group">
@@ -129,9 +149,10 @@ export default function ContactPage() {
               </div>
               <h3 className="text-white font-bold mb-2 text-lg">Email</h3>
               <p className="text-[#B3B3B3] mb-3">Send us an email</p>
-              <a href="mailto:oscarmulele1@gmail.com" className="text-[#FFB800] hover:text-[#FFD700] transition font-semibold">
-                oscarmulele1@gmail.com
+              <a href={`mailto:${siteSettings?.contactEmail || 'oscarmulele1@gmail.com'}`} className="text-[#FFB800] hover:text-[#FFD700] transition font-semibold break-all">
+                {siteSettings?.contactEmail || 'oscarmulele1@gmail.com'}
               </a>
+
             </div>
 
             <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-8 text-center hover:border-[#FFB800] transition-all duration-300 group">

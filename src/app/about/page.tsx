@@ -24,7 +24,7 @@ export default function AboutPage() {
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 
-            backgroundImage: `url('/oscar-sax.jpg')`,
+            backgroundImage: `url('${settings?.aboutImage || '/oscar-sax.jpg'}')`,
             filter: 'blur(8px)',
             transform: 'scale(1.1)'
           }}
@@ -47,7 +47,7 @@ export default function AboutPage() {
                 <div className="w-80 h-80 rounded-full overflow-hidden border-8 border-[#FFB800] shadow-2xl">
                   <div 
                     className="w-full h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url('/oscar-sax.jpg')` }}
+                    style={{ backgroundImage: `url('${settings?.aboutImage || '/oscar-sax.jpg'}')` }}
                   ></div>
                 </div>
               </div>
@@ -63,7 +63,7 @@ export default function AboutPage() {
             <div className="w-full lg:w-1/2 bg-[#f5f5f5] flex items-center p-8 lg:p-16">
               <div className="w-full">
                 <h2 className="text-4xl md:text-5xl font-bold text-black mb-8 tracking-tight">
-                  About Oscar Mulere
+                  About Oscar Mulele
                 </h2>
                 
                 <div className="space-y-6 mb-10">
@@ -74,7 +74,7 @@ export default function AboutPage() {
                   ) : (
                     <>
                       <p className="text-lg text-gray-700 leading-relaxed">
-                        Oscar Mulere is a professional saxophonist based in Kampala, Uganda, with over a decade of experience captivating audiences with his soulful melodies and passionate performances.
+                        Oscar Mulele is a professional saxophonist based in Kampala, Uganda, with over a decade of experience captivating audiences with his soulful melodies and passionate performances.
                       </p>
                       <p className="text-lg text-gray-700 leading-relaxed">
                         His journey with music began at an early age, and through years of dedication and practice, he has mastered the art of bringing emotion and life to every note he plays.

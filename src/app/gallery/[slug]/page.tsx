@@ -91,7 +91,7 @@ export default function GalleryItemPage({ params }: { params: Promise<{ slug: st
               {item?.title || 'Untitled Moment'}
             </h1>
             <p className="text-white/40 text-lg leading-relaxed">
-              {item?.description || "A beautiful moment captured from one of Oscar Mulere's live performances. The soulful sound of the saxophone echoing through the venue, creating an unforgettable atmosphere."}
+              {item?.description || "A beautiful moment captured from one of Oscar Mulele's live performances. The soulful sound of the saxophone echoing through the venue, creating an unforgettable atmosphere."}
             </p>
           </div>
 

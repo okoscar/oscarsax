@@ -54,7 +54,7 @@ export default function Footer() {
           <div className="space-y-8">
             <Link href="/" className="group inline-block">
               <h2 className="text-2xl font-black tracking-tighter text-white group-hover:text-[#FFB800] transition-colors duration-300">
-                OSCAR<span className="text-[#FFB800] group-hover:text-white transition-colors duration-300">MULERE</span>
+                OSCAR<span className="text-[#FFB800] group-hover:text-white transition-colors duration-300">MULELE</span>
               </h2>
             </Link>
             <p className="text-white/40 text-sm leading-relaxed max-w-xs font-medium">
@@ -62,10 +62,10 @@ export default function Footer() {
             </p>
             <div className="flex gap-4">
               {[
-                { label: 'IG', href: settings?.socials?.instagram || 'https://instagram.com/oscarmulere' },
-                { label: 'FB', href: settings?.socials?.facebook || 'https://facebook.com/oscarmulere' },
-                { label: 'YT', href: settings?.socials?.youtube || 'https://youtube.com/@oscarmulere' },
-                { label: 'TK', href: settings?.socials?.tiktok || 'https://tiktok.com/@oscarmulere' }
+                { label: 'IG', href: settings?.socials?.instagram || 'https://instagram.com/oscarmulele' },
+                { label: 'FB', href: settings?.socials?.facebook || 'https://facebook.com/oscarmulele' },
+                { label: 'YT', href: settings?.socials?.youtube || 'https://youtube.com/@oscarmulele' },
+                { label: 'TK', href: settings?.socials?.tiktok || 'https://tiktok.com/@oscarmulele' }
               ].map((social) => (
                 <a 
                   key={social.label} 
@@ -171,7 +171,7 @@ export default function Footer() {
         <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-6">
             <p className="text-white/20 text-[10px] font-bold tracking-[0.2em] uppercase">
-              © {new Date().getFullYear()} OSCAR MULERE
+              © {new Date().getFullYear()} OSCAR MULELE
             </p>
             <span className="hidden md:block w-1 h-1 bg-white/10 rounded-full"></span>
             <div className="flex gap-6">

@@ -70,7 +70,7 @@ export default function GalleryPage() {
 
         <div className="relative z-10 text-center px-6">
           <p className="text-[#FFB800] text-xs font-semibold tracking-[0.4em] uppercase mb-4">
-            Oscar Mulere
+            Oscar Mulele
           </p>
           <h1 className="text-6xl md:text-8xl font-bold text-white tracking-tight leading-none mb-6">
             GALLERY

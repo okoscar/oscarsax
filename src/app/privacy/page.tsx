@@ -9,7 +9,7 @@ export default function PrivacyPage() {
         <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
         <div className="space-y-6 text-white/60 leading-relaxed">
           <p>
-            At Oscar Mulere, we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your personal information when you visit our website.
+            At Oscar Mulele, we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your personal information when you visit our website.
           </p>
           <h2 className="text-xl font-bold text-white">Information We Collect</h2>
           <p>

@@ -9,7 +9,7 @@ export default function TermsPage() {
         <h1 className="text-4xl font-bold mb-8">Terms & Conditions</h1>
         <div className="space-y-6 text-white/60 leading-relaxed">
           <p>
-            Welcome to the official website of Oscar Mulere. By accessing or using our services, you agree to be bound by the following terms and conditions.
+            Welcome to the official website of Oscar Mulele. By accessing or using our services, you agree to be bound by the following terms and conditions.
           </p>
           <h2 className="text-xl font-bold text-white">Booking & Payments</h2>
           <p>
@@ -25,7 +25,7 @@ export default function TermsPage() {
           </p>
           <h2 className="text-xl font-bold text-white">Limitation of Liability</h2>
           <p>
-            Oscar Mulere is not liable for any indirect or consequential loss arising from the use of this website or our services.
+            Oscar Mulele is not liable for any indirect or consequential loss arising from the use of this website or our services.
           </p>
         </div>
         <Link href="/" className="inline-block mt-12 text-[#FFB800] hover:text-white transition-colors">

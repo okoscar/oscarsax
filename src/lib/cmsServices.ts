@@ -15,6 +15,8 @@ export interface SiteSettings {
     youtube?: string;
     tiktok?: string;
   };
+  heroImage?: string;
+  aboutImage?: string;
 }
 
 export const getSiteSettings = async (): Promise<SiteSettings | null> => {
@@ -145,3 +147,75 @@ export const deleteReview = async (id: string) => {
     return { success: false, error: error.message };
   }
 };
+
+export const updateReview = async (id: string, updates: Partial<Review>) => {
+  try {
+    const reviewRef = doc(db, 'reviews', id);
+    await updateDoc(reviewRef, updates);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error updating review:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// --- Events & Services ---
+
+export interface ServiceEvent {
+  id?: string;
+  type: string;
+  title: string;
+  description: string;
+  mediaUrl: string; // Video or image URL
+  createdAt: any;
+}
+
+export const getServices = async () => {
+  try {
+    const servicesRef = collection(db, 'services');
+    const q = query(servicesRef, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    const services: ServiceEvent[] = [];
+    querySnapshot.forEach((doc) => {
+      services.push({ id: doc.id, ...doc.data() } as ServiceEvent);
+    });
+    return services;
+  } catch (error) {
+    console.error('Error fetching services:', error);
+    return [];
+  }
+};
+
+export const addService = async (service: Omit<ServiceEvent, 'id'>) => {
+  try {
+    const servicesRef = collection(db, 'services');
+    const docRef = await addDoc(servicesRef, service);
+    return { success: true, id: docRef.id };
+  } catch (error: any) {
+    console.error('Error adding service:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const updateService = async (id: string, updates: Partial<ServiceEvent>) => {
+  try {
+    const serviceRef = doc(db, 'services', id);
+    await updateDoc(serviceRef, updates);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error updating service:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const deleteService = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, 'services', id));
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error deleting service:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+

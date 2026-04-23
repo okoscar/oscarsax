@@ -14,6 +14,7 @@ export default function MusicPage() {
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [dynamicTracks, setDynamicTracks] = useState<MusicTrack[]>([]);
+  const [volume, setVolume] = useState(1);
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -26,19 +27,19 @@ export default function MusicPage() {
   }, []);
 
   const staticAlbums = [
-    { id: 1, title: 'LIVE AT THE ROYAL ALBERT HALL', artist: 'Oscar Mulere', year: '2024', type: 'Album', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
-    { id: 2, title: 'LIVE IN LOS ANGELES', artist: 'Oscar Mulere', year: '2023', type: 'Album', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
-    { id: 3, title: 'ROAD LESS TRAVELED', artist: 'Oscar Mulere', year: '2023', type: 'Album', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
-    { id: 4, title: 'ROAD LESS TRAVELED (INSTRUMENTAL)', artist: 'Oscar Mulere', year: '2022', type: 'Album', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
+    { id: 1, title: 'LIVE AT THE ROYAL ALBERT HALL', artist: 'Oscar Mulele', year: '2024', type: 'Album', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
+    { id: 2, title: 'LIVE IN LOS ANGELES', artist: 'Oscar Mulele', year: '2023', type: 'Album', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
+    { id: 3, title: 'ROAD LESS TRAVELED', artist: 'Oscar Mulele', year: '2023', type: 'Album', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
+    { id: 4, title: 'ROAD LESS TRAVELED (INSTRUMENTAL)', artist: 'Oscar Mulele', year: '2022', type: 'Album', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
   ];
 
   const staticSingles = [
-    { id: 1, title: 'Smooth Jazz Night', artist: 'Oscar Mulere', year: '2024', type: 'Single', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
-    { id: 2, title: 'Soulful Sax', artist: 'Oscar Mulere', year: '2024', type: 'Single', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
+    { id: 1, title: 'Smooth Jazz Night', artist: 'Oscar Mulele', year: '2024', type: 'Single', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
+    { id: 2, title: 'Soulful Sax', artist: 'Oscar Mulele', year: '2024', type: 'Single', image: '/oscar-sax.jpg', audio: '/Charlie Puth - Attention (Official Instrumental with Backing Vocals) [extra adlibs].mp3' },
   ];
 
   const staticVideos = [
-    { id: 1, title: 'Wedding Performance Highlights', artist: 'Oscar Mulere', year: '2024', views: '12K', thumbnail: '/oscar-sax.jpg', duration: '5:32' },
+    { id: 1, title: 'Wedding Performance Highlights', artist: 'Oscar Mulele', year: '2024', views: '12K', thumbnail: '/oscar-sax.jpg', duration: '5:32' },
   ];
 
   // Convert dynamic tracks to the format expected by the UI
@@ -52,11 +53,23 @@ export default function MusicPage() {
 
   const dynamicVideos = dynamicTracks
     .filter(t => t.type === 'video')
-    .map(t => ({ id: t.id, title: t.title, artist: t.artist, year: '2024', views: 'New', thumbnail: t.thumbnail || '/oscar-sax.jpg', duration: t.duration }));
+    .map(t => ({ 
+      id: t.id, 
+      title: t.title, 
+      artist: t.artist, 
+      year: t.createdAt ? new Date(t.createdAt.seconds * 1000).getFullYear() : '2024', 
+      views: 'New', 
+      thumbnail: t.thumbnail || '/oscar-sax.jpg', 
+      duration: t.duration,
+      audio: t.url 
+    }));
+
 
   const albums = dynamicAlbums.length > 0 ? dynamicAlbums : staticAlbums;
   const singles = dynamicSingles.length > 0 ? dynamicSingles : staticSingles;
   const videos = dynamicVideos.length > 0 ? dynamicVideos : staticVideos;
+
+  const allTracks = [...albums, ...singles];
 
   const playVideo = (video: any) => {
     setSelectedVideo(video);
@@ -128,6 +141,37 @@ export default function MusicPage() {
     }
   };
 
+  const playNext = () => {
+    if (!currentTrack) return;
+    const currentIndex = allTracks.findIndex(t => t.id === currentTrack.id);
+    if (currentIndex !== -1) {
+      const nextIndex = (currentIndex + 1) % allTracks.length;
+      playTrack(allTracks[nextIndex]);
+    }
+  };
+
+  const playPrevious = () => {
+    if (!currentTrack) return;
+    const currentIndex = allTracks.findIndex(t => t.id === currentTrack.id);
+    if (currentIndex !== -1) {
+      const prevIndex = (currentIndex - 1 + allTracks.length) % allTracks.length;
+      playTrack(allTracks[prevIndex]);
+    }
+  };
+
+  const handleVolumeClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (audioRef.current) {
+      const volumeBar = e.currentTarget;
+      const clickPosition = e.clientX - volumeBar.getBoundingClientRect().left;
+      const volumeBarWidth = volumeBar.clientWidth;
+      let newVolume = clickPosition / volumeBarWidth;
+      newVolume = Math.max(0, Math.min(1, newVolume));
+      
+      audioRef.current.volume = newVolume;
+      setVolume(newVolume);
+    }
+  };
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -163,8 +207,9 @@ export default function MusicPage() {
                 className="w-full aspect-video"
                 controls
                 autoPlay
-                src="/wedding.mp4"
+                src={selectedVideo.audio}
               >
+
                 Your browser does not support the video tag.
               </video>
               
@@ -317,7 +362,7 @@ export default function MusicPage() {
                     {currentTrack ? currentTrack.title : 'Select a track'}
                   </h3>
                   <p className="text-[#FFB800] text-sm whitespace-nowrap">
-                    {currentTrack ? currentTrack.artist : 'Oscar Mulere'}
+                    {currentTrack ? currentTrack.artist : 'Oscar Mulele'}
                   </p>
                 </div>
                 
@@ -341,7 +386,7 @@ export default function MusicPage() {
 
               {/* Controls - Compact */}
               <div className="flex items-center gap-3">
-                <button className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition hover:scale-110">
+                <button onClick={playPrevious} className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition hover:scale-110">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
                   </svg>
@@ -362,7 +407,7 @@ export default function MusicPage() {
                   )}
                 </button>
                 
-                <button className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition hover:scale-110">
+                <button onClick={playNext} className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition hover:scale-110">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
                   </svg>
@@ -373,8 +418,13 @@ export default function MusicPage() {
                   <svg className="w-4 h-4 text-white/60" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                   </svg>
-                  <div className="w-16 h-1 bg-white/20 rounded-full">
-                    <div className="w-3/4 h-full bg-[#FFB800] rounded-full"></div>
+                  <div 
+                    className="w-16 h-4 flex items-center cursor-pointer group"
+                    onClick={handleVolumeClick}
+                  >
+                    <div className="w-full h-1 bg-white/20 rounded-full pointer-events-none relative overflow-hidden group-hover:bg-white/30 transition">
+                      <div className="absolute top-0 left-0 h-full bg-[#FFB800] rounded-full" style={{ width: `${volume * 100}%` }}></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -385,7 +435,7 @@ export default function MusicPage() {
               ref={audioRef}
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
-              onEnded={() => setIsPlaying(false)}
+              onEnded={playNext}
             >
               {currentTrack && <source src={currentTrack.audio} type="audio/mpeg" />}
               Your browser does not support the audio element.
