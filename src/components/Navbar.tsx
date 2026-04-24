@@ -49,10 +49,6 @@ export default function Navbar() {
             href="/" 
             className="flex items-center space-x-3 group flex-shrink-0"
           >
-            <div className="relative">
-              <Music className="w-8 h-8 text-white group-hover:text-yellow-400 transition-transform duration-300 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-yellow-400/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300"></div>
-            </div>
             <span className="text-xl font-bold text-white tracking-widest group-hover:text-yellow-400 transition-colors duration-300">
               OSCAR MULELE
             </span>
