@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { uploadMedia, getMediaItems, deleteMediaItem, MediaItem } from '@/lib/firebaseServices';
+import { uploadMedia, getMediaItems, deleteMediaItem, MediaItem, uploadFile } from '@/lib/supabaseServices';
 import { 
   getSiteSettings, updateSiteSettings, SiteSettings,
-  getMusicTracks, addMusicTrack, deleteMusicTrack, MusicTrack,
+  getMusicTracks, addMusicTrack, deleteMusicTrack, updateMusicTrack, MusicTrack,
   getReviews, addReview, deleteReview, updateReview, Review,
   getServices, addService, updateService, deleteService, ServiceEvent
 } from '@/lib/cmsServices';
@@ -13,9 +13,11 @@ import {
   Trash2, Image as ImageIcon, Video as VideoIcon, 
   Settings, Music, Star, Layout, LogOut, Mail, Lock, Calendar
 } from 'lucide-react';
-import { Timestamp } from 'firebase/firestore';
-import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase';
+import { isVideoFile, isYouTubeURL, isImageFile } from '@/lib/mediaUtils';
+
+const supabase = createClient();
 
 type TabType = 'gallery' | 'music' | 'reviews' | 'settings' | 'events';
 
@@ -64,6 +66,10 @@ export default function AdminPage() {
   });
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const [editingReviewData, setEditingReviewData] = useState<Partial<Review>>({});
+  
+  // --- Music Edit States ---
+  const [editingTrackId, setEditingTrackId] = useState<string | null>(null);
+  const [editingTrackData, setEditingTrackData] = useState<Partial<MusicTrack>>({});
 
   // --- Services/Events States ---
   const [services, setServices] = useState<ServiceEvent[]>([]);
@@ -74,18 +80,39 @@ export default function AdminPage() {
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [editingServiceData, setEditingServiceData] = useState<Partial<ServiceEvent>>({});
 
+  // --- File Upload States for Thumbnails ---
+  const [trackThumb, setTrackThumb] = useState<File | null>(null);
+  const [editTrackThumb, setEditTrackThumb] = useState<File | null>(null);
+  const [serviceThumb, setServiceThumb] = useState<File | null>(null);
+  const [editServiceThumb, setEditServiceThumb] = useState<File | null>(null);
+  const [heroThumb, setHeroThumb] = useState<File | null>(null);
+  const [aboutThumb, setAboutThumb] = useState<File | null>(null);
+  const [serviceMedia, setServiceMedia] = useState<File | null>(null);
+  const [editServiceMedia, setEditServiceMedia] = useState<File | null>(null);
+  const [reviewAvatar, setReviewAvatar] = useState<File | null>(null);
+  const [editReviewAvatar, setEditReviewAvatar] = useState<File | null>(null);
+
+
+
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
       setIsAuthLoading(false);
-      if (currentUser) {
+      if (session?.user) fetchAllData();
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      setIsAuthLoading(false);
+      if (session?.user) {
         fetchAllData();
       }
     });
-    return () => unsubscribe();
+    return () => subscription.unsubscribe();
   }, []);
 
   const fetchAllData = async () => {
@@ -104,10 +131,36 @@ export default function AdminPage() {
       ]);
 
       setRecentMedia(media);
-      if (sets) setSettings(sets);
-      setMusicTracks(music);
-      setReviews(revs);
-      setServices(servs);
+      if (sets) {
+        setSettings({
+          ...sets,
+          bio: sets.bio || '',
+          contactEmail: sets.contactEmail || '',
+          contactPhone: sets.contactPhone || '',
+          socials: {
+            instagram: sets.socials?.instagram || '',
+            facebook: sets.socials?.facebook || '',
+            youtube: sets.socials?.youtube || '',
+            tiktok: sets.socials?.tiktok || '',
+          }
+        });
+      }
+      setMusicTracks(music || []);
+      setReviews((revs || []).map(r => ({
+        ...r,
+        name: r.name || '',
+        event: r.event || '',
+        date: r.date || '',
+        text: r.text || ''
+      })));
+      setServices((servs || []).map(s => ({
+        ...s,
+        title: s.title || '',
+        description: s.description || '',
+        type: s.type || 'WEDDINGS',
+        mediaUrl: s.mediaUrl || '',
+        thumbnail: s.thumbnail || ''
+      })));
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -122,7 +175,8 @@ export default function AdminPage() {
     e.preventDefault();
     setLoginError('');
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
     } catch (error: any) {
       setLoginError(error.message || 'Authentication failed. Please check your credentials.');
     }
@@ -130,7 +184,7 @@ export default function AdminPage() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await supabase.auth.signOut();
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -142,78 +196,261 @@ export default function AdminPage() {
   const handleSettingsSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingSettings(true);
-    const result = await updateSiteSettings(settings);
-    if (result.success) setMessage({ type: 'success', text: 'Settings updated!' });
-    else setMessage({ type: 'error', text: result.error || 'Failed' });
+    let updatedSettings = { ...settings };
+    
+    if (heroThumb) {
+      const res = await uploadFile(heroThumb);
+      if (res.success && res.url) updatedSettings.heroImage = res.url;
+    }
+    
+    if (aboutThumb) {
+      const res = await uploadFile(aboutThumb);
+      if (res.success && res.url) updatedSettings.aboutImage = res.url;
+    }
+
+    const result = await updateSiteSettings(updatedSettings);
+    if (result.success) {
+      setMessage({ type: 'success', text: 'Settings saved!' });
+      setHeroThumb(null);
+      setAboutThumb(null);
+    } else {
+      setMessage({ type: 'error', text: result.error || 'Failed to save settings' });
+    }
     setIsSavingSettings(false);
   };
 
   const handleAddTrack = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await addMusicTrack({ ...newTrack, createdAt: Timestamp.now() });
+    setIsUploading(true);
+    let thumbnailUrl = newTrack.thumbnail;
+    
+    if (trackThumb) {
+      const res = await uploadFile(trackThumb);
+      if (res.success && res.url) thumbnailUrl = res.url;
+    }
+
+    const result = await addMusicTrack({ 
+      ...newTrack, 
+      thumbnail: thumbnailUrl, 
+      createdAt: new Date().toISOString() 
+    });
+
     if (result.success) {
       setMessage({ type: 'success', text: 'Track added!' });
-      setNewTrack({ title: '', artist: '', duration: '', url: '', type: 'original' });
+      setNewTrack({ title: '', artist: '', duration: '', url: '', type: 'original', thumbnail: '' });
+      setTrackThumb(null);
       const music = await getMusicTracks();
       setMusicTracks(music);
     }
+    setIsUploading(false);
   };
+
+  const handleUpdateTrack = async (id: string) => {
+    setIsUploading(true);
+    let updates = { ...editingTrackData };
+    
+    if (editTrackThumb) {
+      const res = await uploadFile(editTrackThumb);
+      if (res.success && res.url) updates.thumbnail = res.url;
+    }
+
+    const result = await updateMusicTrack(id, updates);
+    if (result.success) {
+      setMessage({ type: 'success', text: 'Track updated!' });
+      setEditingTrackId(null);
+      setEditingTrackData({});
+      setEditTrackThumb(null);
+      const music = await getMusicTracks();
+      setMusicTracks(music);
+    } else {
+      setMessage({ type: 'error', text: result.error || 'Failed to update track' });
+    }
+    setIsUploading(false);
+  };
+
+
 
   const handleAddReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await addReview({ ...newReview, createdAt: Timestamp.now() });
+    setIsUploading(true);
+    let avatarUrl = '';
+    
+    if (reviewAvatar) {
+      const res = await uploadFile(reviewAvatar);
+      if (res.success && res.url) avatarUrl = res.url;
+    }
+
+    const result = await addReview({ ...newReview, avatar: avatarUrl, createdAt: new Date().toISOString() });
     if (result.success) {
       setMessage({ type: 'success', text: 'Review added!' });
       setNewReview({ name: '', event: '', date: '', text: '', rating: 5 });
+      setReviewAvatar(null);
       const revs = await getReviews();
-      setReviews(revs);
+      setReviews((revs || []).map(r => ({
+        ...r,
+        name: r.name || '',
+        event: r.event || '',
+        date: r.date || '',
+        text: r.text || ''
+      })));
     }
+    setIsUploading(false);
   };
 
   const handleUpdateReview = async (id: string) => {
-    const result = await updateReview(id, editingReviewData);
+    setIsUploading(true);
+    let updates = { ...editingReviewData };
+    
+    if (editReviewAvatar) {
+      const res = await uploadFile(editReviewAvatar);
+      if (res.success && res.url) updates.avatar = res.url;
+    }
+
+    const result = await updateReview(id, updates);
     if (result.success) {
       setMessage({ type: 'success', text: 'Review updated!' });
       setEditingReviewId(null);
       setEditingReviewData({});
+      setEditReviewAvatar(null);
       const revs = await getReviews();
-      setReviews(revs);
+      setReviews((revs || []).map(r => ({
+        ...r,
+        name: r.name || '',
+        event: r.event || '',
+        date: r.date || '',
+        text: r.text || ''
+      })));
     } else {
       setMessage({ type: 'error', text: result.error || 'Failed to update review' });
     }
+    setIsUploading(false);
   };
 
   const handleAddService = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await addService({ ...newService, createdAt: Timestamp.now() });
+    setIsUploading(true);
+    let serviceData = { ...newService };
+    
+    if (serviceMedia) {
+      const res = await uploadFile(serviceMedia);
+      if (res.success && res.url) serviceData.mediaUrl = res.url;
+    }
+    
+    if (serviceThumb) {
+      const res = await uploadFile(serviceThumb);
+      if (res.success && res.url) serviceData.thumbnail = res.url;
+    }
+
+    const result = await addService({ 
+      ...serviceData, 
+      createdAt: new Date().toISOString() 
+    });
+
     if (result.success) {
       setMessage({ type: 'success', text: 'Service added!' });
-      setNewService({ type: 'WEDDINGS', title: '', description: '', mediaUrl: '' });
+      setNewService({ type: 'WEDDINGS', title: '', description: '', mediaUrl: '', thumbnail: '' });
+      setServiceThumb(null);
+      setServiceMedia(null);
       const servs = await getServices();
       setServices(servs);
+    } else {
+      setMessage({ type: 'error', text: result.error || 'Failed to add service' });
     }
+    setIsUploading(false);
   };
 
   const handleUpdateService = async (id: string) => {
-    const result = await updateService(id, editingServiceData);
+    setIsUploading(true);
+    let updatedData = { ...editingServiceData };
+
+    if (editServiceMedia) {
+      const res = await uploadFile(editServiceMedia);
+      if (res.success && res.url) updatedData.mediaUrl = res.url;
+    }
+
+    if (editServiceThumb) {
+      const res = await uploadFile(editServiceThumb);
+      if (res.success && res.url) updatedData.thumbnail = res.url;
+    }
+
+    const result = await updateService(id, updatedData);
     if (result.success) {
       setMessage({ type: 'success', text: 'Service updated!' });
       setEditingServiceId(null);
       setEditingServiceData({});
+      setEditServiceThumb(null);
+      setEditServiceMedia(null);
       const servs = await getServices();
       setServices(servs);
     } else {
       setMessage({ type: 'error', text: result.error || 'Failed to update service' });
     }
+    setIsUploading(false);
   };
+
 
   const handleDeleteService = async (id: string) => {
     if (!confirm('Are you sure you want to delete this event/service?')) return;
-    const result = await deleteService(id);
-    if (result.success) {
-      setMessage({ type: 'success', text: 'Service deleted!' });
-      const servs = await getServices();
-      setServices(servs);
+    try {
+      const result = await deleteService(id);
+      if (result.success) {
+        setMessage({ type: 'success', text: 'Service deleted!' });
+        const servs = await getServices();
+        setServices((servs || []).map(s => ({
+          ...s,
+          title: s.title || '',
+          description: s.description || '',
+          type: s.type || 'WEDDINGS',
+          mediaUrl: s.mediaUrl || '',
+          thumbnail: s.thumbnail || ''
+        })));
+      } else {
+        setMessage({ type: 'error', text: result.error || 'Failed to delete service' });
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Failed to delete service' });
+    }
+  };
+
+  const handleDeleteTrack = async (id: string) => {
+    if (!confirm('Delete this track?')) return;
+    try {
+      const res = await fetch('/api/admin/delete-media', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, sourceTable: 'music' }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setMessage({ type: 'success', text: 'Track deleted!' });
+        const music = await getMusicTracks();
+        setMusicTracks(music);
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to delete track' });
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Failed to delete track' });
+    }
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (!confirm('Delete this review?')) return;
+    try {
+      const res = await fetch('/api/admin/delete-media', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, sourceTable: 'reviews' }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setMessage({ type: 'success', text: 'Review deleted!' });
+        const revs = await getReviews();
+        setReviews(revs);
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to delete review' });
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Failed to delete review' });
     }
   };
 
@@ -226,16 +463,26 @@ export default function AdminPage() {
   const handleDelete = async (item: MediaItem) => {
     if (!item.id) return;
     if (!confirm('Are you sure you want to delete this item?')) return;
-    
-    const res = await deleteMediaItem(item.id, item.url);
-    if (res.success) {
-      setMessage({ type: 'success', text: 'Deleted!' });
-      const media = await getMediaItems();
-      setRecentMedia(media);
-    } else {
-      setMessage({ type: 'error', text: res.error || 'Delete failed' });
+
+    try {
+      const res = await fetch('/api/admin/delete-media', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: item.id, url: item.url, sourceTable: item.sourceTable }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setMessage({ type: 'success', text: 'Deleted!' });
+        const media = await getMediaItems(undefined, undefined, 20);
+        setRecentMedia(media);
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Delete failed' });
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Delete failed' });
     }
   };
+
 
 
   if (isAuthLoading) {
@@ -376,7 +623,10 @@ export default function AdminPage() {
                     <option value="weddings">Weddings</option>
                     <option value="corporate">Corporate</option>
                     <option value="live">Live Shows</option>
+                    <option value="introduction">Introduction Ceremony</option>
+                    <option value="private">Private Events</option>
                   </select>
+
                   <div className="flex gap-4">
                     <button type="button" onClick={() => setType('image')} className={`flex-1 p-3 rounded-xl text-[10px] font-bold uppercase border ${type === 'image' ? 'bg-[#FFB800] border-[#FFB800] text-black' : 'border-white/10'}`}>Image</button>
                     <button type="button" onClick={() => setType('video')} className={`flex-1 p-3 rounded-xl text-[10px] font-bold uppercase border ${type === 'video' ? 'bg-[#FFB800] border-[#FFB800] text-black' : 'border-white/10'}`}>Video</button>
@@ -393,8 +643,15 @@ export default function AdminPage() {
                     <div className="w-12 h-12 rounded-lg bg-black overflow-hidden flex-shrink-0">
                       {item.type === 'video' ? <div className="w-full h-full flex items-center justify-center bg-white/5"><VideoIcon className="w-4 h-4" /></div> : <img src={item.url} className="w-full h-full object-cover" />}
                     </div>
-                    <div className="flex-1"><h4 className="text-sm font-bold">{item.title}</h4><p className="text-[10px] text-white/20 uppercase">{item.category}</p></div>
-                    <button onClick={() => handleDelete(item)} className="p-2 text-white/20 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-bold">{item.title}</h4>
+                      <div className="flex items-center gap-2">
+                        <p className="text-[10px] text-[#FFB800] uppercase font-bold tracking-widest">{item.category}</p>
+                        <span className="text-[8px] px-1.5 py-0.5 rounded bg-white/5 text-white/40 uppercase font-black">{item.sourceTable}</span>
+                      </div>
+                    </div>
+                    <button onClick={() => handleDelete(item)} className="p-2 text-white/20 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+
                   </div>
                 ))}
               </div>
@@ -418,6 +675,11 @@ export default function AdminPage() {
                   <input type="text" placeholder="Artist" value={newTrack.artist} onChange={e => setNewTrack({...newTrack, artist: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
                   <input type="text" placeholder="Duration (e.g. 3:45)" value={newTrack.duration} onChange={e => setNewTrack({...newTrack, duration: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
                   <input type="text" placeholder="YouTube or Audio URL" value={newTrack.url} onChange={e => setNewTrack({...newTrack, url: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" required />
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black tracking-widest text-white/40 uppercase pl-1">Thumbnail Image</label>
+                    <input type="file" accept="image/*" onChange={e => setTrackThumb(e.target.files?.[0] || null)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
+                  </div>
+
                   <div className="flex gap-2">
                     {['original', 'cover', 'video'].map(t => (
                       <button key={t} type="button" onClick={() => setNewTrack({...newTrack, type: t as any})} className={`flex-1 p-2 rounded-lg text-[9px] font-bold uppercase border ${newTrack.type === t ? 'bg-[#FFB800] text-black' : 'border-white/10'}`}>{t}</button>
@@ -425,22 +687,49 @@ export default function AdminPage() {
                   </div>
                   <button className="w-full bg-[#FFB800] text-black py-4 rounded-xl font-bold uppercase">Add Track</button>
                 </form>
+
               </div>
             </div>
             <div className="lg:col-span-7">
               <div className="bg-[#121212] border border-white/5 rounded-3xl divide-y divide-white/5">
                 {musicTracks.map(track => (
-                  <div key={track.id} className="p-4 flex items-center justify-between">
-                    <div><h4 className="text-sm font-bold">{track.title}</h4><p className="text-[10px] text-white/20 uppercase">{track.type} • {track.duration}</p></div>
-                    <button onClick={async () => {
-                      if (track.id) {
-                        await deleteMusicTrack(track.id);
-                        const music = await getMusicTracks(); setMusicTracks(music);
-                      }
-                    }} className="p-2 text-white/20 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                  <div key={track.id} className="p-4">
+                    {editingTrackId === track.id ? (
+                      <div className="space-y-4">
+                        <input type="text" value={editingTrackData.title || ''} onChange={e => setEditingTrackData({...editingTrackData, title: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" placeholder="Title" />
+                        <input type="text" value={editingTrackData.url || ''} onChange={e => setEditingTrackData({...editingTrackData, url: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" placeholder="URL" />
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black tracking-widest text-white/40 uppercase pl-1">Change Thumbnail</label>
+                          <input type="file" accept="image/*" onChange={e => setEditTrackThumb(e.target.files?.[0] || null)} className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" />
+                        </div>
+
+                        <div className="flex gap-2">
+                          {['original', 'cover', 'video'].map(t => (
+                            <button key={t} type="button" onClick={() => setEditingTrackData({...editingTrackData, type: t as any})} className={`flex-1 p-2 rounded-lg text-[9px] font-bold uppercase border ${editingTrackData.type === t ? 'bg-[#FFB800] text-black' : 'border-white/10'}`}>{t}</button>
+                          ))}
+                        </div>
+                        <div className="flex gap-3">
+                          <button onClick={() => handleUpdateTrack(track.id!)} className="bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-xs uppercase">Save</button>
+                          <button onClick={() => { setEditingTrackId(null); setEditingTrackData({}); }} className="bg-white/10 text-white px-4 py-2 rounded-lg font-bold text-xs uppercase">Cancel</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-sm font-bold">{track.title}</h4>
+                          <p className="text-[10px] text-white/20 uppercase">{track.type} • {track.duration}</p>
+                          {track.thumbnail && <p className="text-[8px] text-[#FFB800] uppercase mt-1">Has Thumbnail</p>}
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => { setEditingTrackId(track.id!); setEditingTrackData(track); }} className="text-white/40 hover:text-white text-xs uppercase tracking-widest font-bold">Edit</button>
+                          <button onClick={() => handleDeleteTrack(track.id!)} className="p-2 text-white/20 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
+
             </div>
           </div>
         )}
@@ -455,55 +744,78 @@ export default function AdminPage() {
                   <input type="text" placeholder="Client Name" value={newReview.name} onChange={e => setNewReview({...newReview, name: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" required />
                   <input type="text" placeholder="Event Type" value={newReview.event} onChange={e => setNewReview({...newReview, event: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
                   <textarea placeholder="Testimonial text..." value={newReview.text} onChange={e => setNewReview({...newReview, text: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm h-32" required />
-                  <button className="w-full bg-[#FFB800] text-black py-4 rounded-xl font-bold uppercase">Add Review</button>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black tracking-widest text-white/40 uppercase pl-1">Client Photo (Optional)</label>
+                    <input type="file" accept="image/*" onChange={e => setReviewAvatar(e.target.files?.[0] || null)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
+                  </div>
+                  <button disabled={isUploading} className="w-full bg-[#FFB800] text-black py-4 rounded-xl font-bold uppercase">{isUploading ? 'Adding...' : 'Add Review'}</button>
                 </form>
               </div>
             </div>
             <div className="lg:col-span-7">
               <div className="bg-[#121212] border border-white/5 rounded-3xl divide-y divide-white/5">
-                {reviews.map(rev => (
-                  <div key={rev.id} className="p-6">
-                    {editingReviewId === rev.id ? (
-                      <div className="space-y-4">
-                        <input 
-                          type="text" 
-                          value={editingReviewData.name || ''} 
-                          onChange={e => setEditingReviewData({...editingReviewData, name: e.target.value})} 
-                          className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" 
-                          placeholder="Client Name"
-                        />
-                        <input 
-                          type="text" 
-                          value={editingReviewData.event || ''} 
-                          onChange={e => setEditingReviewData({...editingReviewData, event: e.target.value})} 
-                          className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" 
-                          placeholder="Event Type"
-                        />
-                        <textarea 
-                          value={editingReviewData.text || ''} 
-                          onChange={e => setEditingReviewData({...editingReviewData, text: e.target.value})} 
-                          className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm h-24" 
-                          placeholder="Testimonial text..."
-                        />
-                        <div className="flex gap-3">
-                          <button 
-                            onClick={() => handleUpdateReview(rev.id!)} 
-                            className="bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-xs uppercase"
-                          >
-                            Save
-                          </button>
-                          <button 
-                            onClick={() => { setEditingReviewId(null); setEditingReviewData({}); }} 
-                            className="bg-white/10 text-white px-4 py-2 rounded-lg font-bold text-xs uppercase"
-                          >
-                            Cancel
-                          </button>
+                {reviews.length > 0 ? (
+                  reviews.map(rev => (
+                    <div key={rev.id || Math.random().toString()} className="p-6">
+                      {editingReviewId === rev.id ? (
+                        <div className="space-y-4">
+                          <input 
+                            type="text" 
+                            value={editingReviewData.name || ''} 
+                            onChange={e => setEditingReviewData({...editingReviewData, name: e.target.value})} 
+                            className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" 
+                            placeholder="Client Name"
+                          />
+                          <input 
+                            type="text" 
+                            value={editingReviewData.event || ''} 
+                            onChange={e => setEditingReviewData({...editingReviewData, event: e.target.value})} 
+                            className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" 
+                            placeholder="Event Type"
+                          />
+                          <textarea 
+                            value={editingReviewData.text || ''} 
+                            onChange={e => setEditingReviewData({...editingReviewData, text: e.target.value})} 
+                            className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm h-24" 
+                            placeholder="Testimonial text..."
+                          />
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-black tracking-widest text-white/40 uppercase pl-1">Change Client Photo</label>
+                            <input type="file" accept="image/*" onChange={e => setEditReviewAvatar(e.target.files?.[0] || null)} className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" />
+                          </div>
+                          <div className="flex gap-3">
+                            <button 
+                              onClick={() => handleUpdateReview(rev.id!)} 
+                              className="bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-xs uppercase"
+                            >
+                              Save
+                            </button>
+                            <button 
+                              onClick={() => { setEditingReviewId(null); setEditingReviewData({}); }} 
+                              className="bg-white/10 text-white px-4 py-2 rounded-lg font-bold text-xs uppercase"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="text-sm font-bold">{rev.name}</h4>
+                      ) : (
+                        <div className="flex justify-between items-start">
+                          <div className="flex gap-4">
+                            <div className="w-12 h-12 rounded-full bg-white/5 overflow-hidden flex-shrink-0 flex items-center justify-center border border-white/5">
+                              {rev.avatar && (rev.avatar.startsWith('http') || rev.avatar.startsWith('/')) ? (
+                                <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-xl">{rev.avatar || rev.name.charAt(0)}</span>
+                              )}
+                            </div>
+                            <div>
+                              <div className="flex justify-between items-start mb-1">
+                                <h4 className="text-sm font-bold">{rev.name}</h4>
+                              </div>
+                              <p className="text-xs text-white/60 italic mb-2">"{rev.text}"</p>
+                              <p className="text-[10px] text-[#FFB800] uppercase tracking-widest">{rev.event}</p>
+                            </div>
+                          </div>
                           <div className="flex gap-2">
                             <button 
                               onClick={() => {
@@ -514,21 +826,15 @@ export default function AdminPage() {
                             >
                               Edit
                             </button>
-                            <button onClick={async () => {
-                              if (rev.id) {
-                                if (!confirm('Delete this review?')) return;
-                                await deleteReview(rev.id);
-                                const r = await getReviews(); setReviews(r);
-                              }
-                            }} className="text-white/20 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                            <button onClick={() => handleDeleteReview(rev.id!)} className="text-white/20 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
                           </div>
                         </div>
-                        <p className="text-xs text-white/60 italic mb-3">"{rev.text}"</p>
-                        <p className="text-[10px] text-[#FFB800] uppercase tracking-widest">{rev.event}</p>
-                      </>
-                    )}
-                  </div>
-                ))}
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-12 text-center text-white/40">No reviews found. Add one on the left.</div>
+                )}
               </div>
             </div>
           </div>
@@ -556,7 +862,24 @@ export default function AdminPage() {
                     <option value="PRIVATE EVENTS">Private Events</option>
                   </select>
                   <textarea placeholder="Description..." value={newService.description} onChange={e => setNewService({...newService, description: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm h-24" required />
-                  <input type="text" placeholder="Media URL (Image or Video Link)" value={newService.mediaUrl} onChange={e => setNewService({...newService, mediaUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" required />
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black tracking-widest text-white/40 uppercase pl-1">Event Video/Media (Direct Upload)</label>
+                    <input type="file" accept="video/*,image/*" onChange={e => setServiceMedia(e.target.files?.[0] || null)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
+                  </div>
+                  <div className="relative flex items-center gap-3 py-2">
+                    <div className="h-px bg-white/5 flex-grow"></div>
+                    <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">OR USE LINK</span>
+                    <div className="h-px bg-white/5 flex-grow"></div>
+                  </div>
+                  <input type="text" placeholder="Media URL (YouTube/Vimeo Link)" value={newService.mediaUrl} onChange={e => setNewService({...newService, mediaUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
+                  
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black tracking-widest text-white/40 uppercase pl-1">Thumbnail Image (Cover)</label>
+                    <input type="file" accept="image/*" onChange={e => setServiceThumb(e.target.files?.[0] || null)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
+                  </div>
+
+
+
                   <p className="text-[10px] text-white/40">For videos, you can use paths like "/wedding.mp4" or full URLs.</p>
                   <button className="w-full bg-[#FFB800] text-black py-4 rounded-xl font-bold uppercase">Add Event</button>
                 </form>
@@ -571,7 +894,16 @@ export default function AdminPage() {
                         <input type="text" value={editingServiceData.title || ''} onChange={e => setEditingServiceData({...editingServiceData, title: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" placeholder="Title" />
                         <input type="text" value={editingServiceData.type || ''} onChange={e => setEditingServiceData({...editingServiceData, type: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" placeholder="Type" />
                         <textarea value={editingServiceData.description || ''} onChange={e => setEditingServiceData({...editingServiceData, description: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm h-24" placeholder="Description..." />
-                        <input type="text" value={editingServiceData.mediaUrl || ''} onChange={e => setEditingServiceData({...editingServiceData, mediaUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" placeholder="Media URL" />
+                        <div className="space-y-1">
+                          <label className="text-[10px] text-white/40 uppercase">Update Media File</label>
+                          <input type="file" accept="video/*,image/*" onChange={e => setEditServiceMedia(e.target.files?.[0] || null)} className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" />
+                        </div>
+                        <input type="text" value={editingServiceData.mediaUrl || ''} onChange={e => setEditingServiceData({...editingServiceData, mediaUrl: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" placeholder="Or Update Media URL" />
+                        <div className="space-y-1">
+                          <label className="text-[10px] text-white/40 uppercase">Update Thumbnail</label>
+                          <input type="file" accept="image/*" onChange={e => setEditServiceThumb(e.target.files?.[0] || null)} className="w-full bg-black border border-white/10 rounded-xl p-3 text-sm" />
+                        </div>
+
                         <div className="flex gap-3">
                           <button onClick={() => handleUpdateService(serv.id!)} className="bg-[#FFB800] text-black px-4 py-2 rounded-lg font-bold text-xs uppercase">Save</button>
                           <button onClick={() => { setEditingServiceId(null); setEditingServiceData({}); }} className="bg-white/10 text-white px-4 py-2 rounded-lg font-bold text-xs uppercase">Cancel</button>
@@ -588,7 +920,26 @@ export default function AdminPage() {
                         </div>
                         <p className="text-[10px] text-[#FFB800] uppercase tracking-widest mb-2">{serv.type}</p>
                         <p className="text-xs text-white/60 mb-2">{serv.description}</p>
-                        <p className="text-[10px] text-white/40 truncate">Media: {serv.mediaUrl}</p>
+                        <div className="mt-2 space-y-1">
+                          <p className="text-[10px] text-white/40 truncate">Media: {serv.mediaUrl || 'None'}</p>
+                          {serv.thumbnail && <p className="text-[10px] text-white/40 truncate">Thumb: {serv.thumbnail}</p>}
+                        </div>
+                        <div className="mt-4 flex gap-4">
+                          {serv.mediaUrl && (
+                            <div className="w-20 h-20 rounded-lg bg-black border border-white/5 overflow-hidden">
+                              {isVideoFile(serv.mediaUrl) || isYouTubeURL(serv.mediaUrl) ? (
+                                <div className="w-full h-full flex items-center justify-center bg-white/5"><VideoIcon className="w-6 h-6 text-white/20" /></div>
+                              ) : (
+                                <img src={serv.mediaUrl} className="w-full h-full object-cover" />
+                              )}
+                            </div>
+                          )}
+                          {serv.thumbnail && (
+                            <div className="w-20 h-20 rounded-lg bg-black border border-white/5 overflow-hidden">
+                              <img src={serv.thumbnail} className="w-full h-full object-cover" />
+                            </div>
+                          )}
+                        </div>
                       </>
                     )}
                   </div>
@@ -623,14 +974,17 @@ export default function AdminPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-white/40 uppercase">Hero Background Image URL</label>
-                    <input type="text" placeholder="/oscar-sax.jpg" value={settings.heroImage || ''} onChange={e => setSettings({...settings, heroImage: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
+                    <label className="text-[10px] font-bold text-white/40 uppercase">Hero Background Image</label>
+                    <input type="file" accept="image/*" onChange={e => setHeroThumb(e.target.files?.[0] || null)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
+                    {settings.heroImage && <p className="text-[10px] text-white/20 truncate">Current: {settings.heroImage}</p>}
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-white/40 uppercase">About Section Image URL</label>
-                    <input type="text" placeholder="/oscar-sax.jpg" value={settings.aboutImage || ''} onChange={e => setSettings({...settings, aboutImage: e.target.value})} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
+                    <label className="text-[10px] font-bold text-white/40 uppercase">About Section Image</label>
+                    <input type="file" accept="image/*" onChange={e => setAboutThumb(e.target.files?.[0] || null)} className="w-full bg-black border border-white/10 rounded-xl p-4 text-sm" />
+                    {settings.aboutImage && <p className="text-[10px] text-white/20 truncate">Current: {settings.aboutImage}</p>}
                   </div>
                 </div>
+
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-white/40 uppercase">Email</label>

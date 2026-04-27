@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-black text-white font-sans selection:bg-[#FFB800] selection:text-black">
+      <body className="bg-black text-white font-sans selection:bg-[#FFB800] selection:text-black" suppressHydrationWarning>
         <Navbar />
         {children}
         <Footer />

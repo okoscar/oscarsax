@@ -2,7 +2,7 @@
 
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getMediaItems, MediaItem } from '@/lib/firebaseServices';
+import { getMediaItems, MediaItem } from '@/lib/supabaseServices';
 
 export default function GalleryItemPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);

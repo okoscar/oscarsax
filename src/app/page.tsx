@@ -2,11 +2,14 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { submitContactForm, subscribeToNewsletter } from '@/lib/firebaseServices';
+import { submitContactForm, subscribeToNewsletter } from '@/lib/supabaseServices';
 import { sendBookingNotification } from '@/lib/emailService';
 
 import { useEffect } from 'react';
 import { getSiteSettings, getReviews, getMusicTracks, getServices, SiteSettings, Review as CMSReview, MusicTrack, ServiceEvent } from '@/lib/cmsServices';
+import { getMediaItems, MediaItem } from '@/lib/supabaseServices';
+import { isYouTubeURL, getEmbedUrl, isVideoFile, isSpotifyURL, isSoundCloudURL } from '@/lib/mediaUtils';
+
 
 export default function Home() {
   const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
@@ -14,6 +17,8 @@ export default function Home() {
   const [dynamicReviews, setDynamicReviews] = useState<CMSReview[]>([]);
   const [dynamicMusic, setDynamicMusic] = useState<MusicTrack[]>([]);
   const [dynamicServices, setDynamicServices] = useState<ServiceEvent[]>([]);
+  const [dynamicMedia, setDynamicMedia] = useState<MediaItem[]>([]);
+
 
   
   // Contact Form States
@@ -27,17 +32,20 @@ export default function Home() {
 
   useEffect(() => {
     async function loadCMSData() {
-      const [settings, revs, tracks, servs] = await Promise.all([
+      const [settings, revs, tracks, servs, media] = await Promise.all([
         getSiteSettings(),
         getReviews(),
         getMusicTracks(),
-        getServices()
+        getServices(),
+        getMediaItems(undefined, undefined, 8)
       ]);
       if (settings) setSiteSettings(settings);
       if (revs && revs.length > 0) setDynamicReviews(revs);
       if (tracks && tracks.length > 0) setDynamicMusic(tracks);
       if (servs && servs.length > 0) setDynamicServices(servs);
+      if (media && media.length > 0) setDynamicMedia(media);
     }
+
     loadCMSData();
   }, []);
 
@@ -47,10 +55,9 @@ export default function Home() {
         title: t.title,
         description: t.artist || 'Cover Performance',
         thumbnail: t.thumbnail || '/oscar-sax.jpg',
-        videoUrl: t.url.includes('youtube.com') || t.url.includes('youtu.be') 
-          ? t.url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/') 
-          : t.url
+        videoUrl: getEmbedUrl(t.url)
       }))
+
     : [
         { title: 'Acoustic Cover', description: 'Intimate acoustic arrangements', thumbnail: '/oscar-sax.jpg', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
         { title: 'Live Performance', description: 'Captivating stage presence', thumbnail: '/oscar-sax.jpg', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
@@ -76,7 +83,47 @@ export default function Home() {
       date: "October 2024",
       rating: 5,
       text: "Oscar made our wedding absolutely magical! His saxophone performance during our ceremony brought tears to everyone's eyes.",
-      avatar: "🎭"
+      avatar: "/client_avatar_3_1777306235502.png"
+    },
+    {
+      name: "David K.",
+      event: "Corporate Gala",
+      date: "November 2024",
+      rating: 5,
+      text: "Professional, punctual, and incredibly talented. Oscar elevated our company's annual gala with a perfect mix of jazz and modern hits.",
+      avatar: "/client_avatar_2_1777306004209.png"
+    },
+    {
+      name: "Emily R.",
+      event: "Birthday Celebration",
+      date: "December 2024",
+      rating: 5,
+      text: "Hired Oscar for my husband's 40th birthday. The surprise performance was phenomenal and left all our guests talking about it for weeks!",
+      avatar: "/client_avatar_1_1777305961176.png"
+    },
+    {
+      name: "Michael & Chloe",
+      event: "Introduction Ceremony",
+      date: "January 2025",
+      rating: 5,
+      text: "The way he blended traditional melodies with his saxophone was breathtaking. It perfectly captured the spirit of our cultural celebration.",
+      avatar: "✨"
+    },
+    {
+      name: "The Grand Hotel",
+      event: "Residency",
+      date: "February 2025",
+      rating: 5,
+      text: "Oscar is a regular performer at our lounge. His ability to read the room and set the perfect mood is unmatched. Highly recommended.",
+      avatar: "🏨"
+    },
+    {
+      name: "Grace T.",
+      event: "Private Dinner",
+      date: "March 2025",
+      rating: 5,
+      text: "An unforgettable evening! The music was the perfect backdrop for our anniversary dinner. We will definitely be booking him again.",
+      avatar: "🥂"
     }
   ];
 
@@ -117,7 +164,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat grayscale"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url('${siteSettings?.heroImage || '/oscar-sax.jpg'}')`,
             backgroundPosition: 'center center',
@@ -189,14 +236,13 @@ export default function Home() {
                 className="group relative bg-[#1a1a1a] border border-white/10 overflow-hidden cursor-pointer transition-all duration-500 hover:border-[#FFB800]"
                 style={{ height: '450px' }}
               >
-                <div className="absolute inset-0 overflow-hidden">
                   <div 
                     className="absolute inset-0 bg-cover bg-center grayscale transition-transform duration-700 group-hover:scale-110"
-                    style={{ backgroundImage: `url('/oscar-sax.jpg')` }}
+                    style={{ backgroundImage: `url('${video.thumbnail}')` }}
                   >
                     <div className="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-all duration-500"></div>
                   </div>
-                </div>
+
 
                 <div className="absolute inset-0 bg-[#FFB800]/0 group-hover:bg-[#FFB800]/20 transition-all duration-500 z-10"></div>
                 
@@ -278,13 +324,13 @@ export default function Home() {
                   href={`/music#album-${idx}`}
                   className="group relative flex-shrink-0 w-80 h-96 bg-[#1a1a1a] border border-white/10 overflow-hidden cursor-pointer transition-all duration-700 ease-out hover:border-[#FFB800] snap-center hover:scale-110 hover:z-10"
                 >
-                  <div 
-                    className="absolute inset-0 bg-cover bg-center grayscale"
-                    style={{ backgroundImage: `url(${album.thumbnail || '/oscar-sax.jpg'})` }}
-                  >
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 grayscale"
+                        style={{ backgroundImage: `url('${album.thumbnail}')` }}
+                      >
+                        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all duration-500"></div>
+                      </div>
 
-                    <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-all duration-500"></div>
-                  </div>
 
                   <div className="absolute inset-0 bg-[#FFB800]/0 group-hover:bg-[#FFB800]/15 transition-all duration-500 z-10"></div>
                   
@@ -313,7 +359,9 @@ export default function Home() {
         </div>
       </section>
 
+
       {/* Events Section */}
+
       <section className="bg-[#f5f5f5] py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -334,19 +382,47 @@ export default function Home() {
               { id: '5', type: 'LIVE BAND PERFORMANCES', title: 'Full Band Experience', description: 'Professional band delivering high-energy performances for large events.', mediaUrl: '/introduction.mp4' },
               { id: '6', type: 'PRIVATE EVENTS', title: 'Exclusive Performances', description: 'Custom performances for intimate gatherings and special occasions.', mediaUrl: '/wedding.mp4' }
             ] as any).map((service: any, idx: number) => {
-              const isVideo = service.mediaUrl.toLowerCase().endsWith('.mp4');
+              const isYT = isYouTubeURL(service.mediaUrl);
+              const isSpot = isSpotifyURL(service.mediaUrl);
+              const isSC = isSoundCloudURL(service.mediaUrl);
+              const isVid = isVideoFile(service.mediaUrl) || isYT || isSpot || isSC;
+              
               return (
                 <div key={service.id || idx} className="group relative h-[600px] bg-[#e8e8e8] rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500">
-                  {isVideo ? (
-                    <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline>
-                      <source src={service.mediaUrl} type="video/mp4" />
-                    </video>
-                  ) : (
-                    <div 
-                      className="absolute inset-0 bg-cover bg-center"
-                      style={{ backgroundImage: `url('${service.mediaUrl}')` }}
-                    ></div>
-                  )}
+                    <>
+                      {/* Thumbnail fallback/background */}
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center opacity-40 grayscale group-hover:grayscale-0 transition-all duration-700"
+                        style={{ backgroundImage: `url('${service.thumbnail || service.mediaUrl}')` }}
+                      ></div>
+                      {isYT || isSpot || isSC ? (
+                        <iframe
+                          key={`${isYT ? 'yt' : isSpot ? 'spot' : 'sc'}-${service.id}`}
+                          src={getEmbedUrl(service.mediaUrl)}
+                          className="absolute inset-0 w-full h-full object-cover pointer-events-none scale-110 grayscale group-hover:grayscale-0 transition-all duration-700"
+                          frameBorder="0"
+                          allow="autoplay; encrypted-media; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      ) : (
+                        <video 
+                          key={`vid-${service.id}`}
+                          className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
+                          autoPlay 
+                          loop 
+                          muted 
+                          playsInline
+                          preload="auto"
+                          poster={service.thumbnail || ''}
+                        >
+                          <source src={service.mediaUrl} type="video/mp4" />
+                        </video>
+                      )}
+
+
+                    </>
+
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <div className="absolute bottom-0 left-0 right-0 p-6 z-10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
                     <div className="inline-block bg-[#FFB800] text-black px-3 py-1 rounded-md mb-3 font-bold text-xs uppercase">{service.type}</div>
@@ -401,14 +477,14 @@ export default function Home() {
             <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-gray-50 to-transparent z-10 pointer-events-none"></div>
             <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-gray-50 to-transparent z-10 pointer-events-none"></div>
             
-            <div className="flex overflow-hidden">
-              <div className="flex space-x-6 animate-scroll-reviews">
+            <div className="flex overflow-hidden gap-6 group/scroll">
+              <div className="flex gap-6 shrink-0 animate-scroll-reviews">
                 {displayReviews.map((review, index) => (
                   <ReviewCard key={index} review={review} />
                 ))}
               </div>
               
-              <div className="flex space-x-6 animate-scroll-reviews" aria-hidden="true">
+              <div className="flex gap-6 shrink-0 animate-scroll-reviews" aria-hidden="true">
                 {displayReviews.map((review, index) => (
                   <ReviewCard key={`dup-${index}`} review={review} />
                 ))}
@@ -423,13 +499,13 @@ export default function Home() {
               transform: translateX(0);
             }
             100% {
-              transform: translateX(-50%);
+              transform: translateX(calc(-100% - 1.5rem));
             }
           }
           .animate-scroll-reviews {
             animation: scroll-reviews 40s linear infinite;
           }
-          .animate-scroll-reviews:hover {
+          .group\\/scroll:hover .animate-scroll-reviews {
             animation-play-state: paused;
           }
         `}</style>
@@ -441,7 +517,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="relative h-[600px] rounded-lg overflow-hidden">
               <div 
-                className="absolute inset-0 bg-cover bg-center grayscale"
+                className="absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: `url('${siteSettings?.aboutImage || '/oscar-sax.jpg'}')` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
@@ -531,7 +607,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Section with Firebase */}
+      {/* Contact Section with Supabase */}
       <section className="bg-[#0a0a0a] py-20 px-6 border-t border-white/5">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
@@ -562,7 +638,7 @@ export default function Home() {
             message: (e.target as any).message.value,
   };
 
-        // Save to Firebase
+        // Save to Supabase
          const result = await submitContactForm(formData);
 
        if (result.success) {
@@ -750,13 +826,17 @@ export default function Home() {
   );
 }
 
-function ReviewCard({ review }: { review: { name: string; event: string; date: string; rating: number; text: string; avatar: string } }) {
+function ReviewCard({ review }: { review: { name: string; event: string; date: string; rating: number; text: string; avatar?: string } }) {
   return (
-    <div className="flex-shrink-0 w-[400px] bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 border border-gray-100 group hover:border-[#FFB800]">
+    <div className="flex-shrink-0 w-[320px] sm:w-[350px] bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 border border-gray-100 group hover:border-[#FFB800]">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-[#FFB800] to-[#FFD700] rounded-full flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform duration-300">
-            {review.avatar}
+          <div className="w-12 h-12 bg-gradient-to-br from-[#FFB800] to-[#FFD700] rounded-full flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+            {review.avatar && (review.avatar.startsWith('http') || review.avatar.startsWith('/')) ? (
+              <img src={review.avatar} alt={review.name} className="w-full h-full object-cover" />
+            ) : (
+              <span>{review.avatar || review.name.charAt(0)}</span>
+            )}
           </div>
           <div>
             <h3 className="font-bold text-gray-800 text-base group-hover:text-[#FFB800] transition-colors duration-300">

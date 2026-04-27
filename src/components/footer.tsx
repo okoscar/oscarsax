@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { subscribeToNewsletter } from '@/lib/firebaseServices';
+import { subscribeToNewsletter } from '@/lib/supabaseServices';
 
 import { useEffect } from 'react';
 import { getSiteSettings, SiteSettings } from '@/lib/cmsServices';

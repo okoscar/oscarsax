@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { submitContactForm } from '@/lib/firebaseServices';
+import { submitContactForm } from '@/lib/supabaseServices';
 import { sendBookingNotification } from '@/lib/emailService';
 import { getSiteSettings, SiteSettings } from '@/lib/cmsServices';
 
@@ -93,7 +93,8 @@ export default function ContactPage() {
       {/* Hero Section */}
       <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat grayscale"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+
           style={{
             backgroundImage: `url('/oscar-sax.jpg')`,
             backgroundPosition: 'center center',

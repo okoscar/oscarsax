@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 
 import { useEffect } from 'react';
 import { getMusicTracks, MusicTrack } from '@/lib/cmsServices';
+import { isYouTubeURL, getEmbedUrl, isVideoFile, isSpotifyURL, isSoundCloudURL } from '@/lib/mediaUtils';
 
 export default function MusicPage() {
   const [activeTab, setActiveTab] = useState('popular');
@@ -45,24 +46,45 @@ export default function MusicPage() {
   // Convert dynamic tracks to the format expected by the UI
   const dynamicAlbums = dynamicTracks
     .filter(t => t.type === 'original')
-    .map(t => ({ id: t.id, title: t.title, artist: t.artist, year: '2024', type: 'Album', image: t.thumbnail || '/oscar-sax.jpg', audio: t.url }));
-
-  const dynamicSingles = dynamicTracks
-    .filter(t => t.type === 'cover')
-    .map(t => ({ id: t.id, title: t.title, artist: t.artist, year: '2024', type: 'Single', image: t.thumbnail || '/oscar-sax.jpg', audio: t.url }));
-
-  const dynamicVideos = dynamicTracks
-    .filter(t => t.type === 'video')
     .map(t => ({ 
       id: t.id, 
       title: t.title, 
       artist: t.artist, 
-      year: t.createdAt ? new Date(t.createdAt.seconds * 1000).getFullYear() : '2024', 
+      year: t.createdAt ? new Date(t.createdAt).getFullYear() : '2024', 
+      type: 'Album', 
+      image: t.thumbnail || '/oscar-sax.jpg', 
+      audio: t.url,
+      isVid: isYouTubeURL(t.url) || isVideoFile(t.url) || isSpotifyURL(t.url) || isSoundCloudURL(t.url)
+    }));
+
+  const dynamicSingles = dynamicTracks
+    .filter(t => t.type === 'cover')
+    .map(t => ({ 
+      id: t.id, 
+      title: t.title, 
+      artist: t.artist, 
+      year: t.createdAt ? new Date(t.createdAt).getFullYear() : '2024', 
+      type: 'Single', 
+      image: t.thumbnail || '/oscar-sax.jpg', 
+      audio: t.url,
+      isVid: isYouTubeURL(t.url) || isVideoFile(t.url) || isSpotifyURL(t.url) || isSoundCloudURL(t.url)
+    }));
+
+  const dynamicVideos = dynamicTracks
+    .filter(t => t.type === 'video' || t.type === 'cover')
+    .map(t => ({ 
+      id: t.id, 
+      title: t.title, 
+      artist: t.artist, 
+      year: t.createdAt ? new Date(t.createdAt).getFullYear() : '2024', 
       views: 'New', 
       thumbnail: t.thumbnail || '/oscar-sax.jpg', 
       duration: t.duration,
-      audio: t.url 
+      audio: t.url,
+      isVid: true
     }));
+
+
 
 
   const albums = dynamicAlbums.length > 0 ? dynamicAlbums : staticAlbums;
@@ -90,6 +112,12 @@ export default function MusicPage() {
   };
 
   const playTrack = (track: any) => {
+    // If it's a video, play in modal instead
+    if (track.isVid) {
+      playVideo(track);
+      return;
+    }
+
     if (audioRef.current) {
       // If clicking the same track that's playing, toggle play/pause
       if (currentTrack?.id === track.id && isPlaying) {
@@ -98,10 +126,13 @@ export default function MusicPage() {
       } else {
         // Load and play new track
         setCurrentTrack(track);
-        audioRef.current.src = track.audio;
-        audioRef.current.load();
-        audioRef.current.play();
-        setIsPlaying(true);
+        // We need to wait for the state to update and audio to load
+        setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.play();
+            setIsPlaying(true);
+          }
+        }, 100);
       }
     }
   };
@@ -202,16 +233,29 @@ export default function MusicPage() {
 
             {/* Video Player */}
             <div className="bg-black rounded-lg overflow-hidden shadow-2xl">
-              <video
-                ref={videoRef}
-                className="w-full aspect-video"
-                controls
-                autoPlay
-                src={selectedVideo.audio}
-              >
+              {isYouTubeURL(selectedVideo.audio) || isSpotifyURL(selectedVideo.audio) || isSoundCloudURL(selectedVideo.audio) ? (
+                <iframe
+                  src={isYouTubeURL(selectedVideo.audio) 
+                    ? getEmbedUrl(selectedVideo.audio).replace('autoplay=1&mute=1', 'autoplay=1')
+                    : getEmbedUrl(selectedVideo.audio)
+                  }
+                  className={`w-full ${isSpotifyURL(selectedVideo.audio) ? 'h-[352px]' : isSoundCloudURL(selectedVideo.audio) ? 'h-[450px]' : 'aspect-video'}`}
+                  frameBorder="0"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <video
+                  ref={videoRef}
+                  className="w-full aspect-video"
+                  controls
+                  autoPlay
+                  src={selectedVideo.audio}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              )}
 
-                Your browser does not support the video tag.
-              </video>
               
               {/* Video Info */}
               <div className="p-6 bg-[#1a1a1a]">
@@ -235,12 +279,13 @@ export default function MusicPage() {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('/oscar-sax.jpg')`,
+            backgroundImage: `url('${(dynamicTracks && dynamicTracks.find(t => t.thumbnail)?.thumbnail) || '/oscar-sax.jpg'}')`,
             backgroundPosition: 'center center',
           }}
         >
-          <div className="absolute inset-0 bg-gray-600/70"></div>
+          <div className="absolute inset-0 bg-black/70"></div>
         </div>
+
         
         <div className="relative z-10 h-full flex items-center justify-center">
           <div className="text-center">
@@ -299,45 +344,41 @@ export default function MusicPage() {
             </div>
           )}
 
-          {/* Videos Grid - Shows when videos tab is active */}
+          {/* Videos Grid - Improved UI */}
           {activeTab === 'videos' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
               {videos.map((video) => (
-                <div key={video.id} className="group cursor-pointer bg-[#1a1a1a] rounded-lg overflow-hidden hover:bg-[#252525] transition duration-300">
-                  <div className="relative bg-[#282828] overflow-hidden aspect-video">
-                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                <div key={video.id} onClick={() => playVideo(video)} className="group cursor-pointer">
+                  <div className="relative aspect-video rounded-2xl overflow-hidden mb-4 shadow-2xl bg-[#1a1a1a]">
+                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 opacity-80 group-hover:opacity-100" />
                     
-                    {/* Duration Badge */}
-                    <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-semibold">
-                      {video.duration}
-                    </div>
-                    
-                    {/* Play Button Overlay */}
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        onClick={() => playVideo(video)}
-                        className="w-16 h-16 bg-[#FFB800] rounded-full flex items-center justify-center hover:scale-110 transition shadow-2xl"
-                      >
+                    {/* Floating Play Icon */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                      <div className="w-16 h-16 bg-[#FFB800] rounded-full flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
                         <svg className="w-8 h-8 text-black ml-1" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M8 5v14l11-7z" />
                         </svg>
-                      </button>
+                      </div>
+                    </div>
+
+                    <div className="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md px-2 py-1 rounded text-[10px] font-black tracking-widest uppercase text-white/90">
+                      {video.duration}
                     </div>
                   </div>
                   
-                  <div className="p-4">
-                    <h3 className="font-semibold mb-2 group-hover:text-[#FFB800] transition line-clamp-2">{video.title}</h3>
-                    <p className="text-sm text-white/60 mb-1">{video.artist}</p>
-                    <div className="flex items-center gap-2 text-xs text-white/50">
-                      <span>{video.views} views</span>
-                      <span>•</span>
-                      <span>{video.year}</span>
+                  <div className="px-2">
+                    <h3 className="text-lg font-bold mb-1 group-hover:text-[#FFB800] transition-colors line-clamp-1">{video.title}</h3>
+                    <div className="flex items-center gap-3">
+                       <p className="text-xs font-bold text-[#FFB800] uppercase tracking-widest">{video.artist}</p>
+                       <span className="w-1 h-1 bg-white/20 rounded-full"></span>
+                       <p className="text-xs text-white/40 uppercase tracking-widest">{video.year}</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
+
         </div>
       </section>
 
@@ -437,9 +478,12 @@ export default function MusicPage() {
               onLoadedMetadata={handleLoadedMetadata}
               onEnded={playNext}
             >
-              {currentTrack && <source src={currentTrack.audio} type="audio/mpeg" />}
+              {currentTrack && !isYouTubeURL(currentTrack.audio) && (
+                <source src={currentTrack.audio} type="audio/mpeg" />
+              )}
               Your browser does not support the audio element.
             </audio>
+
           </div>
         </div>
       </div>

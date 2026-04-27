@@ -1,8 +1,12 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getMediaItems, MediaItem } from '@/lib/firebaseServices';
+import { getMediaItems, MediaItem } from '@/lib/supabaseServices';
+import { isYouTubeURL, getEmbedUrl } from '@/lib/mediaUtils';
 
 type Category = 'all' | 'weddings' | 'corporate' | 'live' | 'introduction' | 'private';
 
@@ -24,18 +28,13 @@ export default function GalleryPage() {
   useEffect(() => {
     async function loadMedia() {
       const items = await getMediaItems();
-      // If DB is empty, use some high-quality fallbacks
-      if (items.length === 0) {
-        setMediaItems([
-          { title: 'Live Performance', category: 'live', url: '/oscar-sax.jpg', type: 'image', size: 'tall', createdAt: { seconds: 0, nanoseconds: 0 } as any },
-          { title: 'Wedding Ceremony', category: 'weddings', url: '/oscar-sax.jpg', type: 'image', size: 'normal', createdAt: { seconds: 0, nanoseconds: 0 } as any },
-          { title: 'Corporate Gala', category: 'corporate', url: '/oscar-sax.jpg', type: 'image', size: 'wide', createdAt: { seconds: 0, nanoseconds: 0 } as any },
-        ]);
-      } else {
-        setMediaItems(items);
-      }
+      setMediaItems(items);
+      console.log('--- GALLERY DATA DEBUG ---');
+      console.table(items.map(i => ({ id: i.id, title: i.title, type: i.type, category: i.category, url: i.url })));
       setLoading(false);
+
     }
+
     loadMedia();
   }, []);
 
@@ -63,8 +62,10 @@ export default function GalleryPage() {
       <section className="relative h-[60vh] min-h-[420px] flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center grayscale opacity-50"
-          style={{ backgroundImage: `url('/oscar-sax.jpg')` }}
+          style={{ backgroundImage: `url('${mediaItems.find(m => m.type === 'image')?.url || '/oscar-sax.jpg'}')` }}
         />
+
+
         <div className="absolute inset-0 bg-black/65" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-[#0e0e0e]" />
 
@@ -118,33 +119,57 @@ export default function GalleryPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-24">
-            <p className="text-[#B3B3B3] text-xl">No content in this category yet.</p>
+            <p className="text-white/40 text-sm uppercase tracking-widest">No items found in this category.</p>
           </div>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
-            {filtered.map((item, idx) => (
+
+          <div className="max-w-7xl mx-auto px-6 py-12">
+            <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+              {filtered.map((item, idx) => (
+
               <div
                 key={item.id || idx}
                 onClick={() => openLightbox(idx)}
-                className={`group relative overflow-hidden cursor-pointer break-inside-avoid rounded-xl border border-white/5 hover:border-[#FFB800] transition-all duration-500 shadow-2xl ${
+                className={`group relative overflow-hidden cursor-pointer break-inside-avoid rounded-xl border border-white/20 hover:border-[#FFB800] transition-all duration-500 shadow-2xl bg-white/5 ${
                   item.size === 'tall' ? 'h-[520px]' : item.size === 'wide' ? 'h-[300px]' : 'h-[380px]'
                 }`}
+
               >
                 {/* Media */}
                 {item.type === 'video' ? (
-                   <video 
-                    src={item.url} 
-                    className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
-                    muted
-                    loop
-                    playsInline
-                    autoPlay
-                  />
+                   isYouTubeURL(item.url) ? (
+                     <div className="absolute inset-0 bg-black">
+                       <iframe
+                         src={getEmbedUrl(item.url)}
+                         className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 pointer-events-none"
+                         frameBorder="0"
+                       ></iframe>
+                     </div>
+                   ) : (
+                     <video 
+                      src={item.url} 
+                      className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                      muted
+                      loop
+                      playsInline
+                      autoPlay
+                    />
+                   )
                 ) : (
-                  <div
-                    className="absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
-                    style={{ backgroundImage: `url('${item.url}')` }}
+
+                   <img
+                    src={item.url}
+                    alt={item.title}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-all duration-700"
+                    loading="lazy"
+                    onError={(e) => {
+                      console.error(`Failed to load image: ${item.url}`);
+                      e.currentTarget.src = 'https://via.placeholder.com/800x600?text=Image+Load+Error';
+                    }}
                   />
+
+
+
                 )}
 
                 {/* Dark overlay on hover */}
@@ -178,7 +203,9 @@ export default function GalleryPage() {
               </div>
             ))}
           </div>
+        </div>
         )}
+
       </section>
 
       {/* ── CTA BANNER ── */}
@@ -232,20 +259,34 @@ export default function GalleryPage() {
             onClick={(e) => e.stopPropagation()}
           >
             {filtered[lightboxIndex].type === 'video' ? (
-              <video 
-                src={filtered[lightboxIndex].url} 
-                className="w-full h-full max-h-[80vh] object-contain" 
-                controls 
-                autoPlay
-              />
+              isYouTubeURL(filtered[lightboxIndex].url) ? (
+                <iframe
+                  src={getEmbedUrl(filtered[lightboxIndex].url).replace('autoplay=1&mute=1', 'autoplay=1')}
+                  className="w-full aspect-video max-h-[80vh]"
+                  frameBorder="0"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <video 
+                  src={filtered[lightboxIndex].url} 
+                  className="w-full h-full max-h-[80vh] object-contain" 
+                  controls 
+                  autoPlay
+                />
+              )
             ) : (
-              <div
-                className="w-full bg-contain bg-center bg-no-repeat"
-                style={{
-                  backgroundImage: `url('${filtered[lightboxIndex].url}')`,
-                  aspectRatio: '16/9',
+
+              <img 
+                src={filtered[lightboxIndex].url} 
+                alt={filtered[lightboxIndex].title}
+                className="w-full h-full max-h-[80vh] object-contain"
+                onError={(e) => {
+                  console.error(`Lightbox failed to load: ${filtered[lightboxIndex].url}`);
+                  e.currentTarget.src = 'https://via.placeholder.com/1200x800?text=Preview+Not+Available';
                 }}
               />
+
             )}
             
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-8">

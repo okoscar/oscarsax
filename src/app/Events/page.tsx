@@ -3,186 +3,42 @@
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 
-export default function GalleryGrid() {
+import { getMediaItems, MediaItem } from '@/lib/supabaseServices';
+import { isYouTubeURL, getEmbedUrl } from '@/lib/mediaUtils';
+
+export default function EventsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const featuredVideoRef = useRef<HTMLVideoElement>(null);
 
-  const categories = [
-    { id: 'all', name: 'All' },
-    { id: 'weddings', name: 'Weddings' },
-    { id: 'corporate', name: 'Corporate' },
-    { id: 'live', name: 'Live Shows' },
-    { id: 'studio', name: 'Studio' },
-  ];
-
-  // Optimized gallery items with better media distribution
-  const galleryItems = [
-    // Wedding Photos (3 items)
-    {
-      id: 1,
-      category: 'weddings',
-      image: '/oscar-sax.jpg',
-      type: 'image',
-      size: 'tall',
-      link: '/gallery/serena-wedding',
-      title: 'Serena Wedding'
-    },
-    {
-      id: 2,
-      category: 'weddings',
-      image: '/oscar-sax.jpg',
-      type: 'image',
-      size: 'normal',
-      link: '/gallery/garden-wedding',
-      title: 'Garden Wedding'
-    },
-    {
-      id: 3,
-      category: 'weddings',
-      video: '/wedding.mp4',
-      poster: '/oscar-sax.jpg',
-      type: 'video',
-      size: 'wide',
-      link: '/gallery/wedding-video',
-      title: 'Wedding Performance'
-    },
-
-    // Corporate Content (3 items)
-    {
-      id: 4,
-      category: 'corporate',
-      image: '/oscar-sax.jpg',
-      type: 'image',
-      size: 'normal',
-      link: '/gallery/corporate-event',
-      title: 'Corporate Event'
-    },
-    {
-      id: 5,
-      category: 'corporate',
-      video: '/introduction.mp4',
-      poster: '/oscar-sax.jpg',
-      type: 'video',
-      size: 'tall',
-      link: '/gallery/corporate-video',
-      title: 'Corporate Introduction'
-    },
-    {
-      id: 6,
-      category: 'corporate',
-      video: '/introduction.mp4',
-      poster: '/oscar-sax.jpg',
-      type: 'video',
-      size: 'normal',
-      link: '/gallery/product-launch',
-      title: 'Product Launch'
-    },
-
-    // Live Shows (4 items)
-    {
-      id: 7,
-      category: 'live',
-      image: '/oscar-sax.jpg',
-      type: 'image',
-      size: 'wide',
-      link: '/gallery/live-show',
-      title: 'Live Performance'
-    },
-    {
-      id: 8,
-      category: 'live',
-      image: '/oscar-sax.jpg',
-      type: 'image',
-      size: 'tall',
-      link: '/gallery/concert',
-      title: 'Concert Night'
-    },
-    {
-      id: 9,
-      category: 'live',
-      video: '/wedding.mp4',
-      poster: '/oscar-sax.jpg',
-      type: 'video',
-      size: 'normal',
-      link: '/gallery/live-video',
-      title: 'Live Show Highlights'
-    },
-    {
-      id: 10,
-      category: 'live',
-      video: '/introduction.mp4',
-      poster: '/oscar-sax.jpg',
-      type: 'video',
-      size: 'normal',
-      link: '/gallery/jazz-night',
-      title: 'Jazz Night'
-    },
-
-    // Studio (4 items)
-    {
-      id: 11,
-      category: 'studio',
-      image: '/oscar-sax.jpg',
-      type: 'image',
-      size: 'normal',
-      link: '/gallery/studio-session',
-      title: 'Studio Session'
-    },
-    {
-      id: 12,
-      category: 'studio',
-      video: '/introduction.mp4',
-      poster: '/oscar-sax.jpg',
-      type: 'video',
-      size: 'wide',
-      link: '/gallery/studio-video',
-      title: 'Studio Recording'
-    },
-    {
-      id: 13,
-      category: 'studio',
-      video: '/wedding.mp4',
-      poster: '/oscar-sax.jpg',
-      type: 'video',
-      size: 'tall',
-      link: '/gallery/recording-session',
-      title: 'Recording Session'
-    },
-    {
-      id: 14,
-      category: 'studio',
-      image: '/oscar-sax.jpg',
-      type: 'image',
-      size: 'normal',
-      link: '/gallery/music-production',
-      title: 'Music Production'
-    },
-
-    // Additional Wedding Content (2 items)
-    {
-      id: 15,
-      category: 'weddings',
-      image: '/oscar-sax.jpg',
-      type: 'image',
-      size: 'wide',
-      link: '/gallery/traditional-wedding',
-      title: 'Traditional Wedding'
-    },
-    {
-      id: 16,
-      category: 'weddings',
-      image: '/oscar-sax.jpg',
-      type: 'image',
-      size: 'tall',
-      link: '/gallery/beach-wedding',
-      title: 'Beach Wedding'
+  useEffect(() => {
+    async function loadMedia() {
+      const items = await getMediaItems();
+      setMediaItems(items);
+      console.log('--- EVENTS DATA DEBUG ---');
+      console.table(items.map(i => ({ id: i.id, title: i.title, type: i.type, url: i.url })));
+      setLoading(false);
     }
+    loadMedia();
+  }, []);
+
+
+  const categories = [
+    { id: 'all',          name: 'All' },
+    { id: 'weddings',     name: 'Weddings' },
+    { id: 'corporate',    name: 'Corporate' },
+    { id: 'live',         name: 'Live Shows' },
+    { id: 'introduction', name: 'Introduction' },
+    { id: 'private',      name: 'Private Events' },
   ];
 
   const filteredItems = selectedCategory === 'all' 
-    ? galleryItems 
-    : galleryItems.filter(item => item.category === selectedCategory);
+    ? mediaItems 
+    : mediaItems.filter(item => item.category === selectedCategory);
+
+
 
   // Video error handler
   const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement, Event>, item: any) => {
@@ -246,6 +102,14 @@ export default function GalleryGrid() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-[#FFB800] animate-pulse font-black tracking-widest uppercase">Loading Gallery...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Header Section */}
@@ -284,47 +148,56 @@ export default function GalleryGrid() {
             {filteredItems.map((item, index) => (
               <div
                 key={item.id}
-                className={`group relative overflow-hidden rounded-2xl cursor-pointer
+                className={`group relative overflow-hidden rounded-2xl cursor-pointer border border-white/10 hover:border-[#FFB800] transition-all duration-500 shadow-2xl bg-white/5
                   ${item.size === 'tall' ? 'row-span-2' : ''}
                   ${item.size === 'wide' ? 'col-span-2' : ''}
                   ${item.size === 'normal' ? 'row-span-1' : ''}
                 `}
+
               >
                 {/* Image Cards */}
                 {item.type === 'image' && (
-                  <div 
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-110 bg-gray-800"
-                    style={{ backgroundImage: `url('${item.image}')` }}
-                    onError={handleImageError}
+                  <img 
+                    src={item.url}
+                    alt={item.title}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    onError={(e) => {
+                      console.error(`Failed to load event image: ${item.url}`);
+                      e.currentTarget.src = 'https://via.placeholder.com/800x600?text=Event+Image+Missing';
+                    }}
                   />
+
                 )}
+
 
                 {/* Video Cards */}
                 {item.type === 'video' && (
-                  <div className="absolute inset-0">
-                    <video 
-                      ref={el => { videoRefs.current[index] = el }}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      preload="metadata"
-                      poster={item.poster}
-                      onError={(e) => handleVideoError(e, item)}
-                    >
-                      <source src={item.video} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                    
-                    {/* Video fallback */}
-                    <div 
-                      className="absolute inset-0 bg-cover bg-center bg-gray-800 hidden"
-                      style={{ backgroundImage: `url('${item.poster}')` }}
-                      id={`fallback-${item.id}`}
-                    />
+                  <div className="absolute inset-0 transition-all duration-700">
+
+                    {isYouTubeURL(item.url) ? (
+                      <iframe
+                        src={getEmbedUrl(item.url)}
+                        className="absolute inset-0 w-full h-full object-cover pointer-events-none scale-125"
+                        frameBorder="0"
+                        allow="autoplay; encrypted-media"
+                      />
+                    ) : (
+                      <video 
+                        ref={el => { videoRefs.current[index] = el }}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="metadata"
+                      >
+                        <source src={item.url} />
+                      </video>
+
+                    )}
                   </div>
                 )}
+
 
                 {/* Overlay Color on Hover */}
                 <div className="absolute inset-0 bg-[#FFB800]/0 group-hover:bg-[#FFB800]/10 transition-all duration-500 z-10"></div>
@@ -332,9 +205,15 @@ export default function GalleryGrid() {
                 {/* Gradient Border Effect */}
                 <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#FFB800] rounded-2xl transition-colors duration-500 pointer-events-none z-40"></div>
 
-                {/* Link overlay */}
-                <Link href={item.link} className="absolute inset-0 z-50" />
+                {/* Info overlay on hover */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6 z-30">
+                  <div>
+                    <p className="text-[10px] text-[#FFB800] font-black uppercase tracking-widest mb-1">{item.category}</p>
+                    <h3 className="text-white font-bold text-lg leading-tight uppercase">{item.title}</h3>
+                  </div>
+                </div>
               </div>
+
             ))}
           </div>
         </div>
@@ -353,49 +232,42 @@ export default function GalleryGrid() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Featured Video - LEFT SIDE */}
-            <div className="group relative h-[600px] rounded-2xl overflow-hidden cursor-pointer bg-gray-800">
-              <video 
-                ref={featuredVideoRef}
-                className="absolute inset-0 w-full h-full object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
-                poster="/oscar-sax.jpg"
-              >
-                <source src="/wedding.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-              
-              {/* Video Controls Overlay */}
-              <div className="absolute inset-0 bg-[#FFB800]/0 group-hover:bg-[#FFB800]/10 transition-all duration-500 z-10"></div>
-              
-              {/* Gradient Border Effect */}
-              <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#FFB800] rounded-2xl transition-colors duration-500 pointer-events-none z-40"></div>
-            </div>
-
-            {/* Featured Video - RIGHT SIDE */}
-            <div className="group relative h-[600px] rounded-2xl overflow-hidden cursor-pointer bg-gray-800">
-              <video 
-                className="absolute inset-0 w-full h-full object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
-                poster="/oscar-sax.jpg"
-              >
-                <source src="/introduction.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-              
-              {/* Video Controls Overlay */}
-              <div className="absolute inset-0 bg-[#FFB800]/0 group-hover:bg-[#FFB800]/10 transition-all duration-500 z-10"></div>
-              
-              {/* Gradient Border Effect */}
-              <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#FFB800] rounded-2xl transition-colors duration-500 pointer-events-none z-40"></div>
-            </div>
+            {mediaItems.filter(m => m.type === 'video').slice(0, 2).map((video, vIdx) => (
+              <div key={video.id || vIdx} className="group relative h-[600px] rounded-2xl overflow-hidden cursor-pointer bg-gray-800 grayscale hover:grayscale-0 transition-all duration-700">
+                {isYouTubeURL(video.url) ? (
+                  <iframe
+                    src={getEmbedUrl(video.url)}
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none scale-125"
+                    frameBorder="0"
+                    allow="autoplay; encrypted-media"
+                  />
+                ) : (
+                  <video 
+                    className="absolute inset-0 w-full h-full object-cover"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                  >
+                    <source src={video.url} type="video/mp4" />
+                  </video>
+                )}
+                <div className="absolute inset-0 bg-[#FFB800]/0 group-hover:bg-[#FFB800]/10 transition-all duration-500 z-10"></div>
+                <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#FFB800] rounded-2xl transition-colors duration-500 pointer-events-none z-40"></div>
+                <div className="absolute bottom-6 left-6 z-30">
+                  <p className="text-[10px] text-[#FFB800] font-black uppercase tracking-widest mb-2">{video.category}</p>
+                  <h3 className="text-xl font-bold text-white uppercase tracking-tight">{video.title}</h3>
+                </div>
+              </div>
+            ))}
+            
+            {mediaItems.filter(m => m.type === 'video').length === 0 && (
+              <div className="col-span-2 p-20 text-center border border-white/5 rounded-2xl text-white/20">
+                No featured videos available yet.
+              </div>
+            )}
           </div>
+
         </div>
       </section>
 
